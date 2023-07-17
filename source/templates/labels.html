@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+    <title>אינדקס נושאים</title>
+	<meta name="Description" content="אינדקס נושאים" />
+    <!--#include file="inc/header.asp"-->
+    {% include 'includes/header.html' %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <style>
+        .tag {display:inline-block; cursor:pointer; margin:15px 0;}
+    </style>
+</head>
+<body>
+
+{% include 'includes/top.html' %}
+<div id="pTitle">
+    אינדקס נושאים
+    <div style="font-size:.7em;">
+        גודל הקישור ממחיש את כמות המילים
+    </div>
+</div>
+<div class="table">
+    <!-- TAG CLOUD-->
+    <div id="tagsCloud">
+        <ul>
+            {% for label in labels %}
+            <li style="{{label.style_string}}" title="{{label.title}}">
+                    <a href="{{label.href}}">{{label.name}}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% include 'includes/trailer.html' %}
+</body>
+</html>
