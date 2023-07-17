@@ -153,8 +153,8 @@ for li_tag in soup.find_all("li"):
 
 
 
-@app.route("/")
-def hello_name():
+@app.route("/labels.asp")
+def labels_handler():
     # word_id = request.args.get("id")
     # if not word_id:
     #     word_id = "no word_id was found"
@@ -162,6 +162,22 @@ def hello_name():
     trailer_variable = get_trailer_variables()
 
     return render_template("labels.html", labels=labels, **trailer_variable)
+
+
+
+#http://localhost:8081/label.asp?id=5
+
+
+@app.route("/label.asp")
+def label_handler():
+    # word_id = request.args.get("id")
+    # if not word_id:
+    #     word_id = "no word_id was found"
+
+    trailer_variable = get_trailer_variables()
+
+    return render_template("labels.html", labels=labels, **trailer_variable)
+
 
 
 if __name__ == '__main__':
