@@ -1,5 +1,10 @@
 import csv, pyodbc
 
+from tqdm import tqdm
+
+from arabic_words_db import ArabicWordsDB, History, Labels, Lists, ListsUsers, Log, Media, Sentences, Words, \
+    WordsLabels, WordsLists, WordsMedia, WordsRelations, WordsSentences, WordsShort
+
 # set up some constants
 #MDB = 'c:/path/to/my.mdb'
 #Microsoft Access Driver (*.mdb, *.accdb)
@@ -27,17 +32,27 @@ table_name_to_class_name = {
 }
 
 
+table_names = "history labels lists listsUsers log media sentences words wordsLabels wordsLists wordsMedia " \
+              "wordsRelations wordsSentences wordsShort".split()
 
-# connect to db
-con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
-cur = con.cursor()
 
-# run a query and get the results
-SQL = 'SELECT * FROM words;' # your query goes here
-rows = cur.execute(SQL).fetchall()
+for table_name in table_names:
+    print(table_name)
+    con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
+    cur = con.cursor()
 
-cur.close()
-con.close()
-for row in rows:
-    print(row)
-    break
+    SQL = f'SELECT * FROM {table_names};'
+    rows = cur.execute(SQL).fetchall()
+
+    class_name = table_name_to_class_name[table_name]
+
+    cur.close()
+    con.close()
+    for pyodbc_row in tqdm(rows):
+
+        row = class_name(**pyodbc_row)
+        try:
+            with ArabicWordsDB() as arabic_words_db:
+                arabic_words_db.session.merge(row)
+        except Exception as exception:
+            print(exception, row)
