@@ -41,7 +41,7 @@ for table_name in table_names:
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
     cur = con.cursor()
 
-    SQL = f'SELECT * FROM {table_names};'
+    SQL = f'SELECT * FROM {table_name};'
     rows = cur.execute(SQL).fetchall()
 
     class_name = table_name_to_class_name[table_name]
@@ -56,3 +56,5 @@ for table_name in table_names:
                 arabic_words_db.session.merge(row)
         except Exception as exception:
             print(exception, row)
+            exit()
+        exit()
