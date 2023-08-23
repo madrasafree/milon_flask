@@ -36,13 +36,6 @@ table_names = "history labels lists listsUsers log media sentences words wordsLa
               "wordsRelations wordsSentences wordsShort".split()
 
 
-
-
-for row in rows:
-    schema = {}
-    schema[row[0]] = [row[1]]
-
-
 for table_name in table_names:
     print(table_name)
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
