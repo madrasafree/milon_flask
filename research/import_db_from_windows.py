@@ -54,7 +54,9 @@ for table_name in table_names:
     con.close()
 
     for pyodbc_row in tqdm(rows):
-        row_dict = dict(zip(columns, pyodbc_row))
+        row_dict = {}
+        for x, y in zip(columns, pyodbc_row):
+            row_dict[x] = str(y)
 
         row = class_name(**row_dict)
         try:
