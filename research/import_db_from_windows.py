@@ -36,21 +36,34 @@ table_names = "history labels lists listsUsers log media sentences words wordsLa
               "wordsRelations wordsSentences wordsShort".split()
 
 
+
+
+for row in rows:
+    schema = {}
+    schema[row[0]] = [row[1]]
+
+
 for table_name in table_names:
     print(table_name)
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
     cur = con.cursor()
 
     SQL = f'SELECT * FROM {table_name};'
-    rows = cur.execute(SQL).fetchall()
+    cursor = cur.execute(SQL)
+
+    columns = [column[0] for column in cursor.description]
+
+    rows = cursor.fetchall()
 
     class_name = table_name_to_class_name[table_name]
 
     cur.close()
     con.close()
-    for pyodbc_row in tqdm(rows):
 
-        row = class_name(**pyodbc_row)
+    for pyodbc_row in tqdm(rows):
+        row_dict = dict(zip(columns, pyodbc_row))
+
+        row = class_name(**row_dict)
         try:
             with ArabicWordsDB() as arabic_words_db:
                 arabic_words_db.session.merge(row)
