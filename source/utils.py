@@ -125,22 +125,16 @@ html_string = """<div id="tagsCloud">
 from bs4 import BeautifulSoup
 
 soup = BeautifulSoup(html_string, "html.parser")
-@dataclass
-class Label:
-    name: str
-    title: str
-    href: str
-    style_string: str
 
 
-def get_all_labels():
-    all_labels = []
-    for li_tag in soup.find_all("li"):
-        style_string = li_tag["style"]
-        title = li_tag["title"]
-        a_tag = li_tag.find("a")
-        href = a_tag["href"]
-        name = a_tag.string
-        label = Label(name, title, href, style_string)
-        all_labels.append(label)
-    return all_labels
+# def get_all_labels():
+#     all_labels = []
+#     for li_tag in soup.find_all("li"):
+#         style_string = li_tag["style"]
+#         title = li_tag["title"]
+#         a_tag = li_tag.find("a")
+#         href = a_tag["href"]
+#         name = a_tag.string
+#         label = Label(name, title, href, style_string)
+#         all_labels.append(label)
+#     return all_labels
