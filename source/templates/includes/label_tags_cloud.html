@@ -1,0 +1,11 @@
+<div class="table">
+    <div id="tagsCloud">
+        <ul>
+            {% for label_data_dict in label_data_dicts %}
+            <li style="{{label_data_dict['style_string']}}" title="{{label_data_dict['title']}}">
+                    <a href="{{label_data_dict['href']}}">{{label_data_dict['name']}}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

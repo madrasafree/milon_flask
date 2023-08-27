@@ -35,10 +35,6 @@
     </style>
     <script>
         $(document).ready(function(){
-            // COUNTS HOW MANY WORDS IN LABEL
-            var cnt = $("#countMe").data("count");
-            if (cnt > 1) $("#wordsSum").html(cnt + " מילים");
-
             // HIDES / UNHIDES LABELS LIST
             $("#tagsCloud").hide();
             $("#hide").hide();
@@ -60,59 +56,51 @@
 {% include 'includes/top.html' %}
 <div id="pTitle">קבוצות מילים לפי נושאים</div>
 
-<div id="tagsCloud">
-        <ul>
-            {% for label in labels %}
-            <li style="{{label.style_string}}" title="{{label.title}}">
-                    <a href="{{label.href}}">{{label.name}}</a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+{% include 'includes/label_tags_cloud.html' %}
 
 <div id="tagTitle">
     <div id="hide">הסתר רשימת נושאים</div>
     <div id="unhide">הצג רשימת נושאים</div>
     <h3>{{label_name}}</h3>
-    <span id="wordsSum"></span>
+    <span id="wordsSum">{{word_count}}</span>
 </div>
 
 
-<!--	<%-->
-<!--    dim prevID-->
-<!--    prevID = 0-->
-<!--    mySQL = "SELECT DISTINCT words.id, words.arabic, words.arabicWord, words.hebrewTranslation, words.hebrewDef, words.pronunciation, words.status, words.imgLink, wordsLabels.labelID, wordsMedia.mediaID-->
-<!--    FROM (words INNER JOIN wordsLabels ON words.id = wordsLabels.wordID) LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE show AND-->
-<!--    (((wordsLabels.labelID)=" & LID & ")) ORDER BY "& order-->
-<!--	res.open mySQL, con-->
+	<%
+    dim prevID
+    prevID = 0
+    mySQL = "SELECT DISTINCT words.id, words.arabic, words.arabicWord, words.hebrewTranslation, words.hebrewDef, words.pronunciation, words.status, words.imgLink, wordsLabels.labelID, wordsMedia.mediaID
+    FROM (words INNER JOIN wordsLabels ON words.id = wordsLabels.wordID) LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE show AND
+    (((wordsLabels.labelID)=" & LID & ")) ORDER BY "& order
+	res.open mySQL, con
 
-<!--	    Do until res.EOF-->
-<!--            if res("id")<>prevID then %>-->
-<!--                <div class="result" onclick="location.href='word.asp?id=<%=res("id")%>';">-->
-<!--                    <div class="heb" style="position:relative;"><a href="word.asp?id=<%=res("id")%>"><%=res("hebrewTranslation")%></a><%-->
-<!--                    if len(res("hebrewDef"))>0 then %>-->
-<!--                        <span class="def">(<%=trim(res("hebrewDef"))%>)<%-->
-<!--                    end if %>-->
-<!--                        <span class="icons"><%-->
-<!--                    if len(res("imgLink"))>0 then %>-->
-<!--                        <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" /><%-->
-<!--                    end if-->
-<!--                    if res("mediaID") then %>-->
-<!--                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/><%-->
-<!--                    end if-->
-<!--                    Select Case res("status")-->
-<!--                    Case 1 %>-->
-<!--                        <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" /><%-->
-<!--                    Case -1 %>-->
-<!--                        <span style="background: #ff2f00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">ערך בבדיקה</span><%-->
-<!--                    Case Else %>-->
-<!--                        <span style="background: #ff8d00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">טרם נבדק</span><%-->
-<!--                    End Select %>-->
-<!--                    </div>-->
-<!--                    <div class="arb"><%=res("arabic")%></div>-->
-<!--                    <div class="arb" style="font-size:1.6em"><%=res("arabicWord")%></div>-->
-<!--                    <div class="eng"><%=res("pronunciation")%></div>-->
-<!--                </div>-->
+	    Do until res.EOF
+            if res("id")<>prevID then %>
+                <div class="result" onclick="location.href='word.asp?id=<%=res("id")%>';">
+                    <div class="heb" style="position:relative;"><a href="word.asp?id=<%=res("id")%>"><%=res("hebrewTranslation")%></a><%
+                    if len(res("hebrewDef"))>0 then %>
+                        <span class="def">(<%=trim(res("hebrewDef"))%>)<%
+                    end if %>
+                        <span class="icons"><%
+                    if len(res("imgLink"))>0 then %>
+                        <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" /><%
+                    end if
+                    if res("mediaID") then %>
+                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/><%
+                    end if
+                    Select Case res("status")
+                    Case 1 %>
+                        <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" /><%
+                    Case -1 %>
+                        <span style="background: #ff2f00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">ערך בבדיקה</span><%
+                    Case Else %>
+                        <span style="background: #ff8d00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">טרם נבדק</span><%
+                    End Select %>
+                    </div>
+                    <div class="arb"><%=res("arabic")%></div>
+                    <div class="arb" style="font-size:1.6em"><%=res("arabicWord")%></div>
+                    <div class="eng"><%=res("pronunciation")%></div>
+                </div>
 
 {% include 'includes/trailer.html' %}
 </body>
