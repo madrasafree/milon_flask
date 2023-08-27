@@ -9,19 +9,7 @@ from includes_utils import get_top_variables, get_trailer_variables
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 # """  case x>=0 AND x<=10
-#             tagSize = "0.8em"
-#             case x>=11 AND x<=30
-#             tagSize = "1em"
-#             case x>=31 AND x<=70
-#             tagSize = "1.3em"
-#             case x>=71 AND x<=120
-#             tagSize = "1.5em"
-#             case x>=121 AND x<=180
-#             tagSize = "1.7em"
-#             case x>=180 AND x<=300
-#             tagSize = "1.9em"
-#             case else
-#             tagSize = "2.4em""""
+
 
 
 @app.route("/labels.asp")
@@ -43,8 +31,15 @@ def labels_handler():
                 tag_size = "0.8em"
             elif 11 <= word_count <= 30:
                 tag_size = "1em"
+            elif 71 <= word_count <= 120:
+                tag_size = "1.5em"
+            elif 121 <= word_count <= 180:
+                tag_size = "1.7em"
+            elif 180 <= word_count <= 300:
+                tag_size = "1.9em"
             else:
                 tag_size = "2.4em"
+
 
         label_data_dict = {}
         label_data_dict["name"] = label_name
