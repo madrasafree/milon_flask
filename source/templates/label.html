@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+    <title>{{label_name}}></title>
+	<meta name="Description" content="קבוצות מילים לפי נושאים" />
+    <meta property="og:image"   content="https://milon.madrasafree.com/img/labels/{{label_id}}.png" />
+     {% include 'includes/header.html' %}
+    <style>
+        #lingolearn button:hover {
+            background:yellow;
+        }
+
+        #hide,#unhide {margin-left:10px;text-align:left; cursor:pointer;}
+        #hide:hover,#unhide:hover {font-weight:bold;}
+
+
+        .eng {padding-left: 2px;}
+        .heb {padding-bottom: 4px; padding-right: 2px;}
+        .heb a:link,.heb a:visited {color:#1988cc !important;}
+
+        .listDiv > span {display:block; line-height: 15px;}
+        .pos,.def {display:inline-block !important; font-size:small ;}
+
+        .result {background-color:#ffffff60;padding:4px;border: 1px dotted #a5d0f3; margin-bottom: 3px; box-shadow:0px 6px 17px rgba(144, 190, 234, 0.21);}
+        .result:hover, fieldset:hover {background-color: #fff; border:1px solid #a5d0f3; cursor:pointer;}
+        .icons {display: inline-block; position: absolute; top: 0px; left:0px;}
+        .correct {width:15px;opacity:0.4; position: absolute; top:9px; left:5px;}
+        .imgLink {width:25px;opacity:0.5; float: none; position: absolute; top:4px; left: 42px;}
+        .audio {max-width:16px ; opacity: 0.5; float: none; position: absolute; top:9px; left: 26px;}
+        .erroneous {width:15px;opacity:0.7; position: absolute; top:9px; left:5px;}
+
+        @media (max-width: 600px) {
+            .eng,.heb {float:none;}
+        }
+    </style>
+    <script>
+        $(document).ready(function(){
+            // COUNTS HOW MANY WORDS IN LABEL
+            var cnt = $("#countMe").data("count");
+            if (cnt > 1) $("#wordsSum").html(cnt + " מילים");
+
+            // HIDES / UNHIDES LABELS LIST
+            $("#tagsCloud").hide();
+            $("#hide").hide();
+            $("#unhide").click(function(){
+                $("#tagsCloud").slideToggle();
+                $("#unhide").slideToggle();
+                $("#hide").slideToggle();
+            });
+            $("#hide").click(function(){
+                $("#tagsCloud").slideToggle();
+                $("#unhide").slideToggle();
+                $("#hide").slideToggle();
+            });
+        });
+    </script>
+</head>
+<body>
+
+{% include 'includes/top.html' %}
+<div id="pTitle">קבוצות מילים לפי נושאים</div>
+
+<div id="tagsCloud">
+        <ul>
+            {% for label in labels %}
+            <li style="{{label.style_string}}" title="{{label.title}}">
+                    <a href="{{label.href}}">{{label.name}}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+<div id="tagTitle">
+    <div id="hide">הסתר רשימת נושאים</div>
+    <div id="unhide">הצג רשימת נושאים</div>
+    <h3>{{label_name}}</h3>
+    <span id="wordsSum"></span>
+</div>
+
+
+<!--	<%-->
+<!--    dim prevID-->
+<!--    prevID = 0-->
+<!--    mySQL = "SELECT DISTINCT words.id, words.arabic, words.arabicWord, words.hebrewTranslation, words.hebrewDef, words.pronunciation, words.status, words.imgLink, wordsLabels.labelID, wordsMedia.mediaID-->
+<!--    FROM (words INNER JOIN wordsLabels ON words.id = wordsLabels.wordID) LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE show AND-->
+<!--    (((wordsLabels.labelID)=" & LID & ")) ORDER BY "& order-->
+<!--	res.open mySQL, con-->
+
+<!--	    Do until res.EOF-->
+<!--            if res("id")<>prevID then %>-->
+<!--                <div class="result" onclick="location.href='word.asp?id=<%=res("id")%>';">-->
+<!--                    <div class="heb" style="position:relative;"><a href="word.asp?id=<%=res("id")%>"><%=res("hebrewTranslation")%></a><%-->
+<!--                    if len(res("hebrewDef"))>0 then %>-->
+<!--                        <span class="def">(<%=trim(res("hebrewDef"))%>)<%-->
+<!--                    end if %>-->
+<!--                        <span class="icons"><%-->
+<!--                    if len(res("imgLink"))>0 then %>-->
+<!--                        <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" /><%-->
+<!--                    end if-->
+<!--                    if res("mediaID") then %>-->
+<!--                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/><%-->
+<!--                    end if-->
+<!--                    Select Case res("status")-->
+<!--                    Case 1 %>-->
+<!--                        <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" /><%-->
+<!--                    Case -1 %>-->
+<!--                        <span style="background: #ff2f00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">ערך בבדיקה</span><%-->
+<!--                    Case Else %>-->
+<!--                        <span style="background: #ff8d00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">טרם נבדק</span><%-->
+<!--                    End Select %>-->
+<!--                    </div>-->
+<!--                    <div class="arb"><%=res("arabic")%></div>-->
+<!--                    <div class="arb" style="font-size:1.6em"><%=res("arabicWord")%></div>-->
+<!--                    <div class="eng"><%=res("pronunciation")%></div>-->
+<!--                </div>-->
+
+{% include 'includes/trailer.html' %}
+</body>
+</html>
+

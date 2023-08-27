@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+	<title>מדריך שימוש במילון - מדריך תעתיק והגייה</title>
+	<meta id="Description" content="כמה מילים אודות המילון ואיך הוא עובד" />
+    {% include 'includes/header.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/guide.css') }}" />
+</head>
+<body>
+{% include 'includes/top.html' %}
+<div id="pTitle">מדריך שימוש במילון</div>
+
+<div class="table">
+
+    {% include 'includes/guide.embed.html' %}
+
+    <div class="space" id="links"></div>
+
+</div>
+
+{% include 'includes/trailer.html' %}
+
+</body>
+</html>
