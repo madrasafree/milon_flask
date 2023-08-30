@@ -67,26 +67,11 @@
 
 
 	{% for word in words %}
-                <div class="result" onclick="location.href='word.asp?id=<%=res("id")%>';">
-                    <div class="heb" style="position:relative;"><a href="word.asp?id=<%=res("id")%>"><%=res("hebrewTranslation")%></a><%
-                    if len(res("hebrewDef"))>0 then %>
-                        <span class="def">(<%=trim(res("hebrewDef"))%>)<%
-                    end if %>
-                        <span class="icons"><%
-                    if len(res("imgLink"))>0 then %>
-                        <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" /><%
-                    end if
-                    if res("mediaID") then %>
-                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/><%
-                    end if
-                    Select Case res("status")
-                    Case 1 %>
-                        <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" />
-                    Case -1 %>
-                        <span style="background: #ff2f00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">ערך בבדיקה</span>
-                    Case Else %>
-                        <span style="background: #ff8d00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">טרם נבדק</span>
-                    End Select %>
+                <div class="result" onclick="location.href='word.asp?id={{word.id}}';">
+                    <div class="heb" style="position:relative;"><a href="word.asp?id={{word.id}}">{{word.hebrewTranslation}}</a>
+                        {% if word.hebrewDef %}
+                            <span class="def">({{word.hebrewDef.strip()}})
+                        {% endif %}
                     </div>
                     <div class="arb">{{ word.arabic }}></div>
                     <div class="arb" style="font-size:1.6em">{{ word.arabicWord }}></div>
