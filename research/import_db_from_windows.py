@@ -38,6 +38,8 @@ table_names = "history labels lists listsUsers log media sentences words wordsLa
 
 for table_name in table_names:
     print(table_name)
+    if table_name != "words":
+        continue
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
     cur = con.cursor()
 
@@ -45,7 +47,7 @@ for table_name in table_names:
     cursor = cur.execute(SQL)
 
     columns = [column[0] for column in cursor.description]
-
+    print(len(columns))
     rows = cursor.fetchall()
 
     class_name = table_name_to_class_name[table_name]
@@ -64,5 +66,4 @@ for table_name in table_names:
                 arabic_words_db.session.merge(row)
         except Exception as exception:
             print(exception, row)
-            exit()
-        exit()
+            exit

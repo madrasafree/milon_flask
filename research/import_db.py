@@ -23,9 +23,8 @@ table_name_to_class_name = {
 }
 
 
-db_file_path = Path("~/arabicWords.mdb").expanduser()
+db_file_path = Path("C:\\Users\\rinat\Desktop\\Madrasa\\arabicWords.mdb")
 db_file_path_string = str(db_file_path)
-
 
 #  mdb-tables arabicWords.mdb
 

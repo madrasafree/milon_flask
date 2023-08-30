@@ -20,12 +20,12 @@ PUBLIC_SCHEMA = {"schema": "public"}
 #
 # host = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"
 
-user_name = "db_root"
-password = ""
+user_name = "postgres"
+password = "1234"
 
-host = "milon-db.postgres.database.azure.com"
+host = "localhost"
 
-db_connection_string = f"postgresql://{user_name}:{password}@{host}:5432/arabic_words"
+db_connection_string = f"postgresql://{user_name}:{password}@{host}:5432/arabic_words_db"
 
 
 class ArabicWordsDB:

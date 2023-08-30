@@ -147,7 +147,12 @@ create table if not exists "words"
 	"gender"  text,
 	"number"  text,
 	"binyan"  text,
-	"info"  text
+	"info"  text,
+	"example" text,
+	"creationTimeUTC" text,
+	"imgCredit" text,
+	"creatorID" text,
+	"imgLink" text,
 );
 
 create table if not exists "wordsLabels"
