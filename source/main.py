@@ -67,20 +67,20 @@ def label_handler():
     with ArabicWordsDB() as arabic_words_db:
         rows = arabic_words_db.session.query(WordsLabels.wordID).filter(WordsLabels.labelID == label_id).all()
 
-    all_word_ids = [row.wordID for row in rows]
+    all_label_word_ids = [row.wordID for row in rows]
+
 
     with ArabicWordsDB() as arabic_words_db:
-        rows = arabic_words_db.session.query(Words).filter(Words.id.in_(all_word_ids)).all()
+        words = arabic_words_db.session.\
+            query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+                  Words.pronunciation).filter(Words.id.in_(all_label_word_ids)).all()
 
     word_count = len(rows)
-
-    for row in rows:
-        pass
 
     label_data_dicts = get_label_data_dicts()
 
     return render_template("label.html", label_data_dicts=label_data_dicts, label_name=label_name,
-                           word_count=word_count)
+                           word_count=word_count, words=words)
 
 
 
