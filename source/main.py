@@ -94,7 +94,9 @@ class Image:
     arabic: str
     arabicWord: str
 
-
+@app.route("/about.asp")
+def about_handler():
+    return render_template("about.html")
 
 @app.route("/games.mem.asp")
 def games_mem_handler():
