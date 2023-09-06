@@ -101,6 +101,8 @@
 	</div>
 	<div>מציג {{sentence_count}} משפטים</div>
 
+<!--	TODO: missing arabic words -->
+
 	{% for sentence in sentences %}
 			<div class="sentence flex-container">
 				<div class="heb flex-inner">
@@ -110,6 +112,7 @@
 				</div>
 				<div class="arb flex-inner"><ruby>
 				<rt>
+
 					{{sentence.arabicHeb}}
 				</rt></ruby></div>
 			</div>
