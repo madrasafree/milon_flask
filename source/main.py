@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import func
-from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words
+from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, Sentences
 from includes_utils import get_top_variables, get_trailer_variables
 
 
@@ -83,6 +83,16 @@ def label_handler():
                            word_count=word_count, words=words)
 
 
+@app.route("/sentences.asp")
+def sentences_handler():
+    with ArabicWordsDB() as arabic_words_db:
+        sentence_count = arabic_words_db.session.query(func.count(Sentences.id)).scalar()
+
+    #new query
+    with ArabicWordsDB() as arabic_words_db:
+        sentences = arabic_words_db.session.query(Sentences).all()
+
+    return render_template("sentences.html", sentence_count=sentence_count, sentences=sentences)
 
 @app.route("/guide.asp")
 def guide_handler():
