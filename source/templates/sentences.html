@@ -102,71 +102,24 @@
 	<div>מציג {{sentence_count}} משפטים</div>
 
 	{% for sentence in sentences %}
-
-	<div class="heb flex-inner">
-		<a href="sentence.asp?sID={{sentence.id}}">
-		{{sentence.hebrew}}
-		</a>
-	</div>
+			<div class="sentence flex-container">
+				<div class="heb flex-inner">
+					<a href="sentence.asp?sID={{sentences.id}}">
+					{{sentences.hebrew}}
+					</a>
+				</div>
+				<div class="arb flex-inner"><ruby>
+				<rt>
+					{{sentence.arabicHeb}}
+				</rt></ruby></div>
+			</div>
+			{% if sentence.info %}
+				<div class="info flex-inner">
+				{{sentence.info}}
+				</div>
+			{% endif %}
 	{% endfor %}
 
-<!--	/mySQL = "SELECT * FROM sentences ORDER BY id DESC"-->
-<!--	res.open mySQL, con-->
-<!--	if res.EOF then-->
-<!--		response.write " - EOF"-->
-<!--	else-->
-<!--		do until res.EOF %>-->
-<!--			<div class="sentence flex-container">-->
-<!--				<div class="heb flex-inner">-->
-<!--					<a href="sentence.asp?sID={{sentences.id}}">-->
-<!--					{{sentences.hebrew}}-->
-<!--					</a>-->
-<!--				</div>-->
-<!--				<div class="arb flex-inner"><ruby><%-->
-<!--					arabicFull = res("arabic")-->
-<!--					words = split(arabicFull," ")-->
-<!--					mySQL = "SELECT * FROM wordsSentences WHERE sentence ="&res("id")&" ORDER BY location"-->
-<!--					res2.open mySQL, con-->
-<!--						dim current,wordLocation,i-->
-<!--						current=0-->
-<!--						do until res2.EOF-->
-<!--							wordLocation = res2("location")-->
-<!--							while wordLocation > current-->
-<!--								'REPLACE ADDED SPACE WITH VAR-->
-<!--								response.write words(current)&" "-->
-<!--								current = current+1-->
-<!--							wend-->
-<!--							if cstr(wordID)=cstr(res2("word")) then-->
-<!--								cls="normal highlight"-->
-<!--							end if %>-->
-<!--							<span class="<%=cls%>"> <a href="../word.asp?id=<%=res2("word")%>"><%=words(current)%></a> </span><%-->
-<!--							current = current+1-->
-<!--							cls="normal"-->
-<!--							res2.moveNext-->
-<!--						loop-->
-<!--						for i = current to ubound(words)-->
-<!--							response.write words(current)&" "-->
-<!--							current = current+1-->
-<!--						next-->
-<!--					res2.close-->
-<!--				%>-->
-<!--				<rt><%=res("arabicHeb")%></rt></ruby></div>-->
-<!--			</div><%-->
-<!--				if len(res("info"))>0 then %>-->
-<!--				<div class="info flex-inner"><%=res("info")%></div><%-->
-<!--				end if%><%-->
-<!--			res.moveNext-->
-<!--		loop-->
-<!--	end if-->
-<!--	res.close-->
-
-<!--	endTime = timer()-->
-<!--	durationMs = Int((endTime - startTime)*1000)-->
-<!--	'closeDB-->
-<!--	closeDbLogger "arabicWords","C","TEST.sentences.asp","single",durationMs,""-->
-
-
-<!--	%>-->
 </div>
 {% include 'includes/trailer.html' %}
 </body>
