@@ -124,7 +124,7 @@ def root_handler():
     if search_string:
         pass
     else:
-        pass  # home page
+        return render_template("default.html")
 
 
     #return render_template("games.mem.html", images=images)
