@@ -697,14 +697,14 @@
 
 
 
-<!--&lt;!&ndash; IF NOT WELCOME PAGE &ndash;&gt;<%-->
-<!--if len(strDisplay)>0 then %>-->
-<!--    <div class="notice info" onclick="location.href='guide.asp'">-->
-<!--        הסבר על התעתיק-->
-<!--    </div>-->
+{% if not is_search_string_valid %}
 
-<!--    <hr/><%-->
-<!--end if %>-->
+    <div class="notice info" onclick="location.href='guide.asp'">
+        הסבר על התעתיק
+    </div>
+
+    <hr/>
+{% endif %}
 
 
 

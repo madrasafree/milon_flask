@@ -123,10 +123,11 @@ def root_handler():
     label_data_dicts = get_label_data_dicts()
 
     search_string = request.args.get("searchString")
-    if search_string:
-        pass
 
-    is_search_string_valid = False
+    if search_string.isalpha():  # TODO
+        is_search_string_valid = True
+    else:
+        is_search_string_valid = False
 
     return render_template("default.html", label_data_dicts=label_data_dicts, is_search_string_valid=is_search_string_valid)
 
