@@ -106,6 +106,17 @@ def games_mem_handler():
     return render_template("games.mem.html", images=images)
 
 
+@app.route("/")
+def root_handler():
+    search_string = request.args.get("searchString")
+    if search_string:
+        pass
+    else:
+        pass  # home page
+
+
+    #return render_template("games.mem.html", images=images)
+
 
 
 
