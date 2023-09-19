@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+	<title>ארגז חול - משפטים</title>
+	<meta name="Description" content="נסיונות מילון על משפטים" />
+    {% include 'includes/header.html' %}
+
+	<link rel="stylesheet" href="css/test.css" />
+	<style>
+		.arb {
+			font-size:initial;
+			}
+		.heb {
+			font-size:initial;
+			}
+		.highlight a:link,.highlight a:visited {
+			color:red;
+			}
+		.info {
+			background:#fefefe;
+			border:1px solid #dedede;
+			border-radius:4px;
+			margin:5px 15px 15px 15px;
+			padding:10px;
+			}
+		.normal {
+			padding:0;
+		}
+		.normal a:link,.normal a:visited {
+			border:0;
+			box-shadow:none;
+			color:#2ead31;
+			padding:0;
+			}
+		.normal a:hover {
+			background:yellow;
+			text-decoration:none;
+			}
+		.sentence {
+			background: #ffffff90;
+			border: 1px solid #2ead32ab;
+			border-radius: 0 10px 0 0;
+			margin: 10px 0px;
+			}
+		.sentence > div {
+			text-align:right;
+		}
+		.table {
+			width:initial;
+		}
+		rt {
+			font-size:60%;
+		}
+
+        @media (min-width:1000px) {
+			.flex-container {
+				display:flex;
+				justify-content: center;
+			}
+			.flex-inner {
+				flex: 1;
+				min-width:320px;
+			}
+		}
+	</style>
+	<script>
+	$(function() {
+		$("#toggleTaatik").click(function() {
+			$("rt").slideToggle(function(){
+				return false;
+			});
+		});
+	});
+	</script>
+</head>
+<body>
+{% include 'includes/top.html' %}
+
+
+<div id="bread">
+	<a href=".">מילון</a> /
+<!--	TODO: belongs to the webapp-->
+<!--	<%-->
+<!--	if session("userID")=1 then %>-->
+<!--	<a href="admin.asp">ניהול</a> / <%-->
+<!--	end if %>-->
+	<a href="test.asp">ארגז חול</a> /
+	<h1>משפטים</h1>
+</div>
+
+
+<div class="message warning">
+	דף בבנייה
+</div>
+
+<div class="table" style="margin-top:20px;">
+
+	<div style="margin-bottom:10px;">
+		<a href="sentenceNew.asp">הוספת משפט חדש</a>
+		<a href="#" id="toggleTaatik" style="float:left;">הסתר/הצג תעתיק</a>
+	</div>
+	<div>מציג {{sentence_count}} משפטים</div>
+
+<!--	TODO: missing arabic words -->
+
+	{% for sentence in sentences %}
+			<div class="sentence flex-container">
+				<div class="heb flex-inner">
+					<a href="sentence.asp?sID={{sentences.id}}">
+					{{sentences.hebrew}}
+					</a>
+				</div>
+				<div class="arb flex-inner"><ruby>
+				<rt>
+
+					{{sentence.arabicHeb}}
+				</rt></ruby></div>
+			</div>
+			{% if sentence.info %}
+				<div class="info flex-inner">
+				{{sentence.info}}
+				</div>
+			{% endif %}
+	{% endfor %}
+
+</div>
+{% include 'includes/trailer.html' %}
+</body>
+</html>
