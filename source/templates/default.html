@@ -373,37 +373,48 @@
 <!--                next-->
 <!--            end if-->
 
+    	{% for word in words %}
+                <div class="result" onclick="location.href='word.asp?id={{word.id}}';">
+                    <div class="heb" style="position:relative;"><a href="word.asp?id={{word.id}}">{{word.hebrewTranslation}}</a>
+                        {% if word.hebrewDef %}
+                            <span class="def">({{word.hebrewDef.strip()}})
+                        {% endif %}
+                                <span class="icons">
+                                 <img src="../static/images/search.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" />
+                                 <img src="../static/images/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/>
+                                 <img src="../static/images/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" />
+                                </span>
+                            </span>
+                    </div>
+                    <div class="arb">{{ word.arabic }}</div>
+                    <div class="arb" style="font-size:1.6em">{{ word.arabicWord }}</div>
+                    <div class="eng">{{ word.pronunciation }}</div>
+                </div>
 
-<!--            if (found=true) and (skip=false) then-->
-<!--                countMe = countMe+1 %>-->
+    {% endfor %}
 
-<!--                <div class="exact">-->
-<!--                    <div class="result" onclick="location.href='word.asp?id=<%=res("id")%>';">-->
-<!--                        <div class="heb" style="position: relative;">-->
-<!--                            <a href="word.asp?id=<%=res("id")%>"><%=res("hebrewTranslation")%></a>-->
-<!--                            <%-->
-<!--                            if len(res("hebrewDef"))>0 then %>-->
-<!--                                <span class="def">(<%=trim(res("hebrewDef"))%>)</span><%-->
-<!--                            end if %>-->
-<!--                            <span class="icons"><%-->
-<!--                            if res("mediaID") then %>-->
-<!--                                <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/><%-->
-<!--                            end if-->
-<!--                            Select Case res("status")-->
-<!--                            Case 1 %>-->
-<!--                                <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" /><%-->
-<!--                            Case -1 %>-->
-<!--                                <mark>ערך בבדיקה</mark><%-->
-<!--                            Case Else %>-->
-<!--                                <mark>טרם נבדק</mark><%-->
-<!--                            End Select %>-->
-<!--                            </span>-->
-<!--                        </div>-->
-<!--                        <div class="arb"><%=res("arabic")%></div>-->
-<!--                        <div class="arb"><%=res("arabicWord")%></div>-->
-<!--                        <div class="eng">-->
-<!--                            <%=res("pronunciation")%>-->
-<!--                        </div>-->
+
+
+
+          {% for word in words %}
+
+                <div class="exact">
+                    <div class="result" onclick="location.href='word.asp?id={{word.id}}';">
+                        <div class="heb" style="position: relative;">
+                            <a href="word.asp?id={{word.id}}">{{word.hebrewTranslation}}</a>
+                              {% if word.hebrewDef %}
+                                <span class="def">({{word.hebrewDef.strip()}})
+                            {% endif %}
+                                    <span class="icons">
+                                 <img src="../static/images/search.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" />
+                                 <img src="../static/images/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/>
+                                 <img src="../static/images/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" />
+                                </span>
+                        </div>
+                        <div class="arb">{{ word.arabic }}</div>
+                         <div class="arb" style="font-size:1.6em">{{ word.arabicWord }}</div>
+                         <div class="eng">{{ word.pronunciation }}</div>
+
 <!--                        <div class="attr">-->
 <!--                            <div class="pos"><%-->
 <!--                                SELECT CASE res("partOfSpeach")-->
@@ -440,8 +451,11 @@
 <!--                                END SELECT %>-->
 <!--                            </div>-->
 <!--                        </div>-->
-<!--                    </div>-->
-<!--                </div><%-->
+
+                    </div>
+                </div>
+
+     {% endfor %}
 
 
 <!--                'SHOW MEDIA'-->

@@ -123,13 +123,21 @@ def root_handler():
     label_data_dicts = get_label_data_dicts()
 
     search_string = request.args.get("searchString")
+    search_string = search_string.strip()
 
     if search_string.isalpha():  # TODO
         is_search_string_valid = True
+
+        with ArabicWordsDB() as arabic_words_db:
+            words = arabic_words_db.session. \
+                query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+                      Words.pronunciation).filter(Words.hebrewClean == search_string).all()
+
     else:
         is_search_string_valid = False
 
-    return render_template("default.html", label_data_dicts=label_data_dicts, is_search_string_valid=is_search_string_valid)
+    return render_template("default.html", label_data_dicts=label_data_dicts,
+                           is_search_string_valid=is_search_string_valid, words=words)
 
 
 
