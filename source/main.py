@@ -126,9 +126,9 @@ def root_handler():
     if search_string:
         pass
 
+    is_search_string_valid = False
 
-
-    return render_template("default.html", label_data_dicts=label_data_dicts)
+    return render_template("default.html", label_data_dicts=label_data_dicts, is_search_string_valid=is_search_string_valid)
 
 
 

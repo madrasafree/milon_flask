@@ -289,16 +289,14 @@
 
 <!--    <%-->
 
-<!--if len(strClean)=0 then-->
-<!--    if len(strDisplay)>0 then %>-->
+{% if not is_search_string_valid %}
 
-
-<!--        <div style="text-align: center; padding: 5px; background: #ffd7d73d; border-bottom: 2px solid #ff8282; margin: 0 auto 80px auto; color: #ff8282;">-->
-<!--            <p>-->
-<!--                יש להשתמש באותיות בעברית וערבית בלבד (אפשר גם ספרות)-->
-<!--            </p>-->
-<!--        </div> <%-->
-<!--    end if-->
+    <div style="text-align: center; padding: 5px; background: #ffd7d73d; border-bottom: 2px solid #ff8282; margin: 0 auto 80px auto; color: #ff8282;">
+        <p>
+            יש להשתמש באותיות בעברית וערבית בלבד (אפשר גם ספרות)
+        </p>
+    </div>
+{% endif %}
 
 <!--else-->
 <!--    startTime = timer()-->
