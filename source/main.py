@@ -120,14 +120,15 @@ def games_mem_handler():
 
 @app.route("/")
 def root_handler():
+    label_data_dicts = get_label_data_dicts()
+
     search_string = request.args.get("searchString")
     if search_string:
         pass
-    else:
-        return render_template("default.html")
 
 
-    #return render_template("games.mem.html", images=images)
+
+    return render_template("default.html", label_data_dicts=label_data_dicts)
 
 
 
