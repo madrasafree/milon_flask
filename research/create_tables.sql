@@ -152,7 +152,7 @@ create table if not exists "words"
 	"creationTimeUTC" text,
 	"imgCredit" text,
 	"creatorID" text,
-	"imgLink" text,
+	"imgLink" text
 );
 
 create table if not exists "wordsLabels"
