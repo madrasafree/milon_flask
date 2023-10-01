@@ -1,22 +1,45 @@
+import re
 
 def get_sound_index(word):
 
     sound_index = ""
+    letters = word
+    dbl = False
+    # Removes chars which aren't Hebrew or Arabic letters, or Geresh
+    letters = re.sub(r"[^א-ת'ؠ-يٱ-ٳٶ-ە]", "", letters)
 
     for character_index, character in enumerate(word):
-
-        if character in ["צ", "ץ", "ד"] and word[character_index +1] == "'":
+        next_char = character_index + 1
+        if dbl:
+            dbl = False
+        elif character in ["א", "ו", "י"]:
+            if character_index > 0:
+                sound_index += "" # hebrew a'he'vi
+            else:
+                if character in ["א"]:
+                    sound_index += "A"
+                elif character in ["ו"]:
+                    sound_index += "W"
+                else:
+                    sound_index += "Y"
+        elif character in ["צ", "ץ", "ד"] and next_char < len(word) and word[character_index +1] == "'":
             sound_index += "D"
-        elif character in ["ט"] and word[character_index +1] == "'":
+            dbl = True
+        elif character in ["ט"] and next_char < len(word) and word[character_index +1] == "'":
             sound_index += "S"
-        elif character in ["ת"] and word[character_index +1] == "'":
+            dbl = True
+        elif character in ["ת"] and next_char < len(word) and word[character_index +1] == "'":
             sound_index += "T"
-        elif character in ["ה", "ח"] and word[character_index +1] == "'":
+            dbl = True
+        elif character in ["ה", "ח"] and next_char < len(word) and word[character_index +1] == "'":
             sound_index += "H"
-        elif character in ["ג", "ז"] and word[character_index + 1] == "'":
+            dbl = True
+        elif character in ["ג", "ז"] and next_char < len(word) and word[character_index + 1] == "'":
             sound_index += "J"
-        elif character in ["ר"] and word[character_index + 1] == "'":
+            dbl = True
+        elif character in ["ר"] and next_char < len(word) and word[character_index + 1] == "'":
             sound_index += "R"
+            dbl = True
         # arabic letters
         elif character in ["ا", "آ", "أ", "إ", "ئ", "ة", "ء", "ؤ", "ي", "ى", "و"]:
             sound_index += ""
@@ -52,8 +75,8 @@ def get_sound_index(word):
     return sound_index
 
 
-print(get_sound_index("עזר"))
-
-#assert get_sound_index("עיתונות") == "ATNT"
-# assert get_sound_index("עזר") == "ASR"
-# assert get_sound_index("שכל") == "JKL"
+assert get_sound_index("עיתונות") == "ATNT"
+assert get_sound_index("עזר") == "ASR"
+assert get_sound_index("שכל") == "JKL"
+assert get_sound_index("כאפיה") == "KFH"
+assert get_sound_index("החלטה") == "HHLTH"
