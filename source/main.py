@@ -122,7 +122,7 @@ def games_mem_handler():
 def root_handler():
     label_data_dicts = get_label_data_dicts()
 
-    search_string = request.args.get("searchString")
+    search_string = request.args.get("searchString", "")
     search_string = search_string.strip()
 
     if search_string.isalpha():  # TODO
@@ -135,6 +135,7 @@ def root_handler():
 
     else:
         is_search_string_valid = False
+        words = []
 
     return render_template("default.html", label_data_dicts=label_data_dicts,
                            is_search_string_valid=is_search_string_valid, words=words)
