@@ -8,7 +8,7 @@ def get_sound_index(word):
     # Removes chars which aren't Hebrew or Arabic letters, or Geresh
     letters = re.sub(r"[^א-ת'ؠ-يٱ-ٳٶ-ە]", "", letters)
 
-    for character_index, character in enumerate(word):
+    for character_index, character in enumerate(letters):
         next_char = character_index + 1
         if dbl:
             dbl = False
