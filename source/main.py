@@ -133,17 +133,20 @@ def root_handler():
                 query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
                       Words.pronunciation).filter(Words.hebrewClean == search_string).all()
 
+        sound_index = get_sound_index(search_string)
+
+        with ArabicWordsDB() as arabic_words_db:
+            sound_like_words = arabic_words_db.session. \
+                query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+                      Words.pronunciation).filter(Words.sndxArabicV1.like(f"%{sound_index}%"),
+                                                  Words.sndxHebrewV1.like(f"%{sound_index}%")).all()
+
+
     else:
         is_search_string_valid = False
         exact_match_words = []
-
-    sound_index = get_sound_index(search_string)
-
-    with ArabicWordsDB() as arabic_words_db:
-        sound_like_words = arabic_words_db.session. \
-            query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                  Words.pronunciation).filter(Words.sndxArabicV1.like(f"%{sound_index}%"),
-                                              Words.sndxHebrewV1.like(f"%{sound_index}%")).all()
+        sound_index = ""
+        sound_like_words = []
 
     return render_template("default.html",
                            label_data_dicts=label_data_dicts,
