@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from sound_index_function import get_sound_index
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import func
 from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, Sentences
@@ -129,19 +129,23 @@ def root_handler():
         is_search_string_valid = True
 
         with ArabicWordsDB() as arabic_words_db:
-            words = arabic_words_db.session. \
+            exact_match_words = arabic_words_db.session. \
                 query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
                       Words.pronunciation).filter(Words.hebrewClean == search_string).all()
 
     else:
         is_search_string_valid = False
-        words = []
+        exact_match_words = []
 
-    return render_template("default.html", label_data_dicts=label_data_dicts,
-                           is_search_string_valid=is_search_string_valid, words=words)
+    sound_index = get_sound_index(search_string)
+    sound_like_words = []
 
-
-
+    return render_template("default.html",
+                           label_data_dicts=label_data_dicts,
+                           is_search_string_valid=is_search_string_valid,
+                           exact_match_words=exact_match_words,
+                           sound_index=sound_index,
+                           sound_like_words=sound_like_words)
 
 
 

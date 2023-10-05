@@ -379,7 +379,7 @@
 
 
 
-          {% for word in words %}
+          {% for word in exact_match_words %}
 
                 <div class="exact">
                     {{ word_result(word) }}
@@ -387,7 +387,16 @@
 
      {% endfor %}
 
+<h2 id='cnt2'>מילים שנשמעות כמו מה שחיפשתם<span style='font-size:.7em; float:left; padding-left:4px;'>{{sound_index}}</span></h2>
 
+
+              {% for word in sound_like_words %}
+
+                <div>
+                    {{ word_result(word) }}
+                </div>
+
+     {% endfor %}
 
 
 
