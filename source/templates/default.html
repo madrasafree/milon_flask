@@ -2,10 +2,12 @@
 <!--#include file="team/inc/functions/string.asp"-->
 <!--#include file="inc/functions/functions.asp"-->
 <!--#include file="inc/time.asp"-->
+
 <!DOCTYPE html>
 <html style="height:100%;">
 <head>
      {% include 'includes/header.html' %}
+    {% from "includes/word_result_macro.html" import word_result %}
     <title>מילון ערבית מדוברת - לדוברי עברית</title>
     <meta name="Description" content="המילון לערבית מדוברת (לדוברי עברית) הוא שירות חינמי שנועד לעזור לקהילת לומדי הערבית המדוברת" />
     <!--meta name="Keywords" content="מילון, ערבית, מדוברת, עברית, עברי, ערבי, חופשי, חינם, חינמי, תרגום, תירגום, מילים, איך, אומרים, בערבית" /> up to 2021-06 -->
@@ -380,60 +382,7 @@
           {% for word in words %}
 
                 <div class="exact">
-                    <div class="result" onclick="location.href='word.asp?id={{word.id}}';">
-                        <div class="heb" style="position: relative;">
-                            <a href="word.asp?id={{word.id}}">{{word.hebrewTranslation}}</a>
-                              {% if word.hebrewDef %}
-                                <span class="def">({{word.hebrewDef.strip()}})
-                            {% endif %}
-                                    <span class="icons">
-                                 <img src="../static/images/search.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" />
-                                 <img src="../static/images/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/>
-                                 <img src="../static/images/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" />
-                                </span>
-                        </div>
-                        <div class="arb">{{ word.arabic }}</div>
-                         <div class="arb" style="font-size:1.6em">{{ word.arabicWord }}</div>
-                         <div class="eng">{{ word.pronunciation }}</div>
-
-<!--                        <div class="attr">-->
-<!--                            <div class="pos"><%-->
-<!--                                SELECT CASE res("partOfSpeach")-->
-<!--                                    case 0 response.write "-"-->
-<!--                                    case 1 response.write "שם עצם"-->
-<!--                                    case 2 response.write "שם תואר"-->
-<!--                                    case 3 response.write "פועל"-->
-<!--                                        if res("binyan")=>1 then %><span style="font-size:small;"> (בניין <%=res("binyan")%>)</span><%end if-->
-<!--                                    case 4 response.write "תואר הפועל"-->
-<!--                                    case 5 response.write "מילית יחס"-->
-<!--                                    case 6 response.write "מילית חיבור"-->
-<!--                                    case 7 response.write "מילת קריאה"-->
-<!--                                    case 8 response.write "תחילית"-->
-<!--                                    case 9 response.write "סופית"-->
-<!--                                END SELECT %>-->
-<!--                            </div>-->
-<!--                            <div class="gender"><%-->
-<!--                                SELECT CASE res("gender")-->
-<!--                                    case 0 response.write "נטרלי"-->
-<!--                                    case 1 response.write "זכר"-->
-<!--                                    case 2 response.write "נקבה"-->
-<!--                                    case 3 response.write "-"-->
-<!--                                END SELECT %>-->
-<!--                            </div>-->
-<!--                            <div class="number"><%-->
-<!--                                SELECT CASE res("number")-->
-<!--                                    case 0 response.write "בלתי ספיר"-->
-<!--                                    case 1 response.write "יחיד"-->
-<!--                                    case 2 response.write "זוגי"-->
-<!--                                    case 3 response.write "רבים"-->
-<!--                                    case 4 response.write "-"-->
-<!--                                    case 5 response.write "לא רלוונטי"-->
-<!--                                    case 6 response.write "שם קיבוצי"-->
-<!--                                END SELECT %>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-                    </div>
+                    {{ word_result(word) }}
                 </div>
 
      {% endfor %}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   {% include 'includes/image_html_macro.html' %}
+  {% from "includes/image_html_macro.html" import image_html %}
+
+
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+
+
+<body>
+
+<p>block1</p>
+
+  {% for image in images %}
+    {{  image_html(image) }}
+   {% endfor %}
+
+
+<p>block2</p>
+
+  {% for image in images %}
+     {{  image_html(image) }}
+   {% endfor %}
+
+
+</body>
+</html>
