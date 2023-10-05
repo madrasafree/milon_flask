@@ -61,7 +61,7 @@ def get_sound_index(word):
             sound_index += "K"
         elif character in ["ش", "ש", "ج", "ג'", "ז'"]:
             sound_index += "J"
-        elif character in ["غ", "ע'", "ر", "ר", "ר'"]:
+        elif character in ["غ", "ע'", "ر", "ר", "ר'"]:  # TODO "ע'" not working
             sound_index += "R"
         elif character in ["ل", "ל"]:
             sound_index += "L"
