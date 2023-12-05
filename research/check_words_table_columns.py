@@ -15,9 +15,12 @@ for column_name in result:
     column_names_from_postgres.append(column_name[0])
 
 #print(column_names_from_postgres)
+current_dir =  os.path.abspath(os.path.dirname(__file__))
+parent_dir = os.path.abspath(current_dir + "/../")
+db_file_path = Path(parent_dir + "\\App_Data\\arabicWords.mdb")
 
 #connecting to access to extract the column names
-MDB = 'c:/Users/rinat/Desktop/Madrasa/arabicWords.mdb'
+MDB = str(db_file_path)
 DRV = 'Microsoft Access Driver (*.mdb, *.accdb)'
 PWD = ''
 

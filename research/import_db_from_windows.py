@@ -1,18 +1,19 @@
-import csv, pyodbc
-
+import os
+from pathlib import Path
+import pyodbc
 from tqdm import tqdm
-
-from arabic_words_db import ArabicWordsDB, History, Labels, Lists, ListsUsers, Log, Media, Sentences, Words, \
-    WordsLabels, WordsLists, WordsMedia, WordsRelations, WordsSentences, WordsShort
+from source.arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
+                                    ListsUsers, Log, Media, Sentences, Words,
+                                    WordsLabels, WordsLists, WordsMedia,
+                                    WordsRelations, WordsSentences, WordsShort)
 
 # set up some constants
-#MDB = 'c:/path/to/my.mdb'
-#Microsoft Access Driver (*.mdb, *.accdb)
-
-MDB = 'c:/Users/rinat/Desktop/Madrasa/arabicWords.mdb'
+current_dir =  os.path.abspath(os.path.dirname(__file__))
+parent_dir = os.path.abspath(current_dir + "/../")
+db_file_path = Path(parent_dir + "\\App_Data\\arabicWords.mdb")
+MDB = str(db_file_path)
 DRV = 'Microsoft Access Driver (*.mdb, *.accdb)'
 PWD = ''
-
 
 table_name_to_class_name = {
     "history": History,
@@ -42,8 +43,8 @@ for table_name in table_names:
         continue
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
     cur = con.cursor()
-
-    SQL = f'SELECT * FROM {table_name};'
+    
+    SQL = f'SELECT * FROM "{table_name}";'
     cursor = cur.execute(SQL)
 
     columns = [column[0] for column in cursor.description]
@@ -63,7 +64,11 @@ for table_name in table_names:
         row = class_name(**row_dict)
         try:
             with ArabicWordsDB() as arabic_words_db:
-                arabic_words_db.session.merge(row)
+                print(row)
+                arabic_words_db.session.add(row)
+                arabic_words_db.session.commit()
+                #arabic_words_db.session.merge(row)
         except Exception as exception:
-            print(exception, row)
-            exit
+            print(row)
+            print(exception)
+            break

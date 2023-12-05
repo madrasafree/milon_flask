@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import json
 
 from sqlalchemy import Column, create_engine, inspect
@@ -17,16 +19,17 @@ Base = declarative_base()
 PUBLIC_SCHEMA = {"schema": "public"}
 
 
-#
-# host = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"
+
 
 user_name = "postgres"
-password = "1234"
-
-host = "localhost"
-
-db_connection_string = f"postgresql://{user_name}:{password}@{host}:5432/arabic_words_db"
-
+password = ""
+# host = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
+# host = "localhost"                                                        # LOCAL DEVELOPMENT
+host_address = "127.0.0.1"                                                          # LOCAL DEVELOPMENT
+port = "5432"
+#mdb = "arabic_words_db"
+maintenance_database = "postgres"
+db_connection_string = f"postgresql://{user_name}:{password}@{host_address}:{port}/{maintenance_database}"
 
 class ArabicWordsDB:
     def __init__(self):
@@ -161,7 +164,6 @@ class Media(Base):
     creationTime = Column(TEXT)
     creationTimeUTC = Column(TEXT)
     lastUpdateUTC = Column(TEXT)
-
 
 
 class Sentences(Base):

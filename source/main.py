@@ -121,7 +121,6 @@ def games_mem_handler():
 @app.route("/")
 def root_handler():
     label_data_dicts = get_label_data_dicts()
-
     search_string = request.args.get("searchString", "")
     search_string = search_string.strip()
 
@@ -155,8 +154,7 @@ def root_handler():
                            sound_index=sound_index,
                            sound_like_words=sound_like_words)
 
-
-
-
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8081, debug=True)
+    #app.run(host="192.168.2.109", port=5000, debug=True)
+    #app.run(host="0.0.0.0", port=8081, debug=True)
+    app.run(host="127.0.0.1", port=5431, debug=True)

@@ -3,7 +3,7 @@ from meza import io
 from arabic_words_db import ArabicWordsDB, History, Labels, Lists, ListsUsers, Log, Media, Sentences, Words, \
     WordsLabels, WordsLists, WordsMedia, WordsRelations, WordsSentences, WordsShort
 from tqdm import tqdm
-
+from os
 
 table_name_to_class_name = {
     "history": History,
@@ -22,8 +22,11 @@ table_name_to_class_name = {
     "wordsShort": WordsShort
 }
 
+current_dir =  os.path.abspath(os.path.dirname(__file__))
+parent_dir = os.path.abspath(current_dir + "/../")
+file_dir = parent_dir + "\\App_Data\\arabicWords.mdb"
 
-db_file_path = Path("C:\\Users\\rinat\Desktop\\Madrasa\\arabicWords.mdb")
+db_file_path = Path(parent_dir + "\\App_Data\\arabicWords.mdb")
 db_file_path_string = str(db_file_path)
 
 #  mdb-tables arabicWords.mdb
