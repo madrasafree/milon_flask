@@ -17,7 +17,7 @@ for column_name in result:
 #print(column_names_from_postgres)
 current_dir =  os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.abspath(current_dir + "/../")
-db_file_path = Path(parent_dir + "\\App_Data\\arabicWords.mdb")
+db_file_path = Path(parent_dir + "\\database\\arabicWords.mdb")
 
 #connecting to access to extract the column names
 MDB = str(db_file_path)

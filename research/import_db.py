@@ -24,9 +24,9 @@ table_name_to_class_name = {
 
 current_dir =  os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.abspath(current_dir + "/../")
-file_dir = parent_dir + "\\App_Data\\arabicWords.mdb"
+file_dir = parent_dir + "\\database\\arabicWords.mdb"
 
-db_file_path = Path(parent_dir + "\\App_Data\\arabicWords.mdb")
+db_file_path = Path(parent_dir + "\\database\\arabicWords.mdb")
 db_file_path_string = str(db_file_path)
 
 #  mdb-tables arabicWords.mdb
