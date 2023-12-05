@@ -22,7 +22,7 @@ PUBLIC_SCHEMA = {"schema": "public"}
 
 
 user_name = "postgres"
-password = ""
+password = ""   # TODO: ADD PASSWORD!
 # host = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
 # host = "localhost"                                                        # LOCAL DEVELOPMENT
 host_address = "127.0.0.1"                                                          # LOCAL DEVELOPMENT

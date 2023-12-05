@@ -10,7 +10,7 @@ from source.arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
 # set up some constants
 current_dir =  os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.abspath(current_dir + "/../")
-db_file_path = Path(parent_dir + "\\App_Data\\arabicWords.mdb")
+db_file_path = Path(parent_dir + "\\database\\arabicWords.mdb")
 MDB = str(db_file_path)
 DRV = 'Microsoft Access Driver (*.mdb, *.accdb)'
 PWD = ''
@@ -44,7 +44,7 @@ for table_name in table_names:
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
     cur = con.cursor()
     
-    SQL = f'SELECT * FROM "{table_name}";'
+    SQL = f'SELECT * FROM {table_name};'
     cursor = cur.execute(SQL)
 
     columns = [column[0] for column in cursor.description]
@@ -65,9 +65,7 @@ for table_name in table_names:
         try:
             with ArabicWordsDB() as arabic_words_db:
                 print(row)
-                arabic_words_db.session.add(row)
-                arabic_words_db.session.commit()
-                #arabic_words_db.session.merge(row)
+                arabic_words_db.session.merge(row)
         except Exception as exception:
             print(row)
             print(exception)
