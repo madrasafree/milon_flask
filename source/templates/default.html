@@ -16,7 +16,7 @@
     <meta property="og:description" content="המילון לערבית מדוברת (לדוברי עברית) הוא שירות חינמי שנועד לעזור לקהילת לומדי הערבית המדוברת" />
     <meta property="og:url" content="https://milon.madrasafree.com/" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="img/site/og-image.png">
+    <meta property="og:image" content="static/images/site/og-image.png">
     <style>
         /* loading animation START - this code is DUPLIC from edit.css - MERGE needed */
         .lds-ring {
@@ -182,22 +182,22 @@
         }
                 .eng, .heb {
                 float: none;
-}
+        }
     </style>
     <script>
         $(document).ready(function(){
 
             // HIDDEN ON PAGE LOAD
             $("#tagsCloud").hide();
-
+            
             // SHOWING NUMBERS NEXT TO SEARCH RESULTS
             var cnt1 = $("#count1").data("count");
+            
             if (cnt1 >= 1) $("#msgRsltsExct").show();
             if (cnt1 == 0) $("#msgRsltsZeroExct").show();
             if (cnt1 > 1) $("#cnt1").prepend(cnt1+" תוצאות מדויקות");
             if (cnt1 == 1) $("#cnt1").prepend("תוצאה מדויקת אחת")
-
-
+            
             var cnt2 = $("#count2").data("count"); //SOUNDEX
             if (cnt2 > 1) $("#cnt2").prepend(cnt2+" ");
             if (cnt2 == 0) $("#cnt2").hide();
@@ -223,75 +223,58 @@
             if ($("#count3").data("count") == undefined) $("#msgRsltsZeroExct").hide();
             if (($("#count3").data("count") == undefined) && (cnt1 == 0)) $("#msgRsltsNoneShort").show();
 
-
             // HIDES / UNHIDES LABELS LIST
             $("#tagsTile").click(function(){
                 $("#tagsCloud").slideToggle();
                 return false;
             });
-
         });
 
     </script>
 </head>
 <body>
     {% include 'includes/top.html' %}
-<!--#include file="team/inc/functions/soundex.asp"-->
+    {% include 'includes/soundex.html' %}
 
 
+<div class="box">
+    <h1>מילון ערבית מדוברת</h1>
+    
+    <div id="msgRsltsExct" style="DISPLAY:NONE; text-align: center; padding: 5px; background:#fff5d7b8; border-bottom: 2px solid #8286ff; margin: 0 auto; color: #8286ff;">
+        <span style="font-weight:bold;" id="cnt1"></span>
+        <span style="font-size:small;" id="cntRest"></span>
+    </div>
 
-<!--    <%-->
-
-<!--dim countMe,resultPos,id,ids,idx,skip,wordMain,title,psikArr,psikWord,found-->
-
-<!--countMe = 0-->
-<!--resultPos = 0-->
-<!--ids = ""-->
-<!--skip = false-->
-<!--wordMain=0 %>-->
-
-
-<!--<div class="box">-->
-<!--    <h1>מילון ערבית מדוברת</h1>-->
-
-<!--    <div id="msgRsltsExct" style="DISPLAY:NONE; text-align: center; padding: 5px; background:#fff5d7b8; border-bottom: 2px solid #8286ff; margin: 0 auto; color: #8286ff;">-->
-<!--        <span style="font-weight:bold;" id="cnt1"></span>-->
-<!--        <span style="font-size:small;" id="cntRest"></span>-->
-<!--    </div>-->
-
-<!--    <div id="msgRsltsZeroExct" style="DISPLAY:NONE; text-align: center; padding: 5px; background: #fff5d7b8; border-bottom: 2px solid #ffaa82; margin: 0 auto; color: #ffaa82;">-->
-<!--        <p style="font-weight:bold;">-->
-<!--            אויש!-->
-<!--            <br>לא מצאנו ב-ד-י-ו-ק את מה שכתבתם-->
-<!--            <br>אבל כן מצאנו <span style="font-size:small;" id="cntMore"></span> תוצאות אחרות:-->
-<!--        </p>-->
-<!--    </div>-->
-
-<!--    <div id="msgRsltsNone" style="DISPLAY:NONE; text-align: center; padding: 5px; background: #ffd7d73d; border-bottom: 2px solid #ff8282; margin: 0 auto; color: #ff8282;">-->
-<!--        <p style="font-weight:bold;">-->
-<!--            אופס!-->
-<!--            <br>לא מצאנו את מה שחיפשתם-->
-<!--        </p>-->
-<!--        <ul style="text-align:right; width:max-content; margin:0 auto; padding-left:15%;"><u>טיפים</u>:-->
-<!--            <li>חפשו פעלים בגוף שלישי עבר</li>-->
-<!--            <li>חפשו שמות עצם בצורת יחיד</li>-->
-<!--            <li>חפשו מילה אחת כל פעם</li>-->
-<!--        </ul>-->
-<!--        <br>-->
-<!--    </div>-->
-
-<!--    <div id="msgRsltsNoneShort" style="DISPLAY:NONE; text-align: center; padding: 5px; background: #ffd7d73d; border-bottom: 2px solid #ff8282; margin: 0 auto; color: #ff8282;">-->
-<!--        <p style="font-weight:bold;">-->
-<!--            לא עלו תוצאות-->
-<!--        </p>-->
-<!--        יש מעט מאוד מילים קצרות כל כך במילון-->
-<!--        <p style="padding:20px; max-width:300px; margin:0 auto; font-size:small;">-->
-<!--            אם אתם בטוחים שהמילה הזו אמורה להופיע במילון, פנו אלינו כדי שנוסיף אותה - admin@madrasafree.com-->
-<!--        </p>-->
-<!--    </div>-->
+    <div id="msgRsltsZeroExct" style="DISPLAY:NONE; text-align: center; padding: 5px; background: #fff5d7b8; border-bottom: 2px solid #ffaa82; margin: 0 auto; color: #ffaa82;">
+        <p style="font-weight:bold;">
+            אויש!
+            <br>לא מצאנו ב-ד-י-ו-ק את מה שכתבתם
+            <br>אבל כן מצאנו <span style="font-size:small;" id="cntMore"></span> תוצאות אחרות:
+        </p>
+    </div>
+    <div id="msgRsltsNone" style="DISPLAY:NONE; text-align: center; padding: 5px; background: #ffd7d73d; border-bottom: 2px solid #ff8282; margin: 0 auto; color: #ff8282;">
+        <p style="font-weight:bold;">
+            אופס!
+            <br>לא מצאנו את מה שחיפשתם
+        </p>
+        <ul style="text-align:right; width:max-content; margin:0 auto; padding-left:15%;"><u>טיפים</u>:
+            <li>חפשו פעלים בגוף שלישי עבר</li>
+            <li>חפשו שמות עצם בצורת יחיד</li>
+            <li>חפשו מילה אחת כל פעם</li>
+        </ul>
+        <br>
+    </div>
+    <div id="msgRsltsNoneShort" style="DISPLAY:NONE; text-align: center; padding: 5px; background: #ffd7d73d; border-bottom: 2px solid #ff8282; margin: 0 auto; color: #ff8282;">
+        <p style="font-weight:bold;">
+            לא עלו תוצאות
+        </p>
+        יש מעט מאוד מילים קצרות כל כך במילון
+        <p style="padding:20px; max-width:300px; margin:0 auto; font-size:small;">
+            אם אתם בטוחים שהמילה הזו אמורה להופיע במילון, פנו אלינו כדי שנוסיף אותה - admin@madrasafree.com
+        </p>
+    </div>
 
 
-<!--    <%-->
 
 {% if not is_search_string_valid %}
 
@@ -300,230 +283,30 @@
             יש להשתמש באותיות בעברית וערבית בלבד (אפשר גם ספרות)
         </p>
     </div>
+{% else %}
+    {% for word in exact_match_words %}
+            
+    <div class="exact">
+        {{ word_result(word) }}
+    </div>
+
+    {% endfor %}
+    {% if exact_match_words.length == 1 %}
+
+    {% else %}
+
+    {% endif %}
 {% endif %}
-
-<!--else-->
-<!--    startTime = timer()-->
-<!--    'openDB "arabicWords"-->
-<!--    openDbLogger "arabicWords","O","default.asp","Main",strClean-->
-
-<!--    if len(strClean)=1 then-->
-<!--        mySQL = "SELECT W.*, M.mediaID "&_-->
-<!--                "FROM [words] W "&_-->
-<!--                "LEFT JOIN wordsMedia M ON W.id = M.wordID "&_-->
-<!--                "WHERE W.id IN (SELECT S.wordID FROM [wordsShort] S WHERE sStr='"&strClean&"') AND show"-->
-
-<!--    else-->
-<!--        mySQL = "SELECT words.*, wordsMedia.mediaID FROM words LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE "&_-->
-<!--                "((hebrewClean LIKE '%"& strClean &"%') OR (hebrewCleanMore LIKE '%"& strClean &"%') OR "&_-->
-<!--                "(arabicClean = '"& strClean &"') OR (arabicCleanMore LIKE '%"& strClean &"%') OR"&_-->
-<!--                "(arabicHebClean = '"& strClean &"') OR (arabicHebCleanMore LIKE '%"& strClean &"%')) AND show"-->
-<!--    end if-->
-<!--    res.open mySQL, con, 0, 1 'adOpenForwardOnly, adLockReadOnly-->
-<!--    'res.open mySQL, con, 0 'adOpenForwardOnly-->
-<!--    'res.open mySQL, con-->
-<!--    if not res.EOF then-->
-<!--        Do until res.EOF-->
-<!--            found=false-->
-<!--            skip = false-->
-<!--            idx=Split(ids,",")-->
-<!--            for each id in idx-->
-<!--                if id=cstr(res("id")) then skip=true-->
-<!--            next-->
-
-<!--            if strClean = res("hebrewClean") or (strClean = res("arabicClean")) or (strClean) = res("arabicHebClean") then-->
-<!--                found = true-->
-<!--                if ids = "" then ids = res("id") else ids = ids & "," & res("id")-->
-<!--            else-->
-<!--                psikArr = split(res("hebrewClean"),",")-->
-<!--                for each psikWord in psikArr-->
-<!--                    if onlyLetters(strDisplay) = psikWord then-->
-<!--                        found = true-->
-<!--                        if ids = "" then ids = res("id") else ids = ids & "," & res("id")-->
-<!--                    end if-->
-<!--                next-->
-<!--            end if-->
-
-<!--            'CHECK FOR MORE EXACT RESULTS 1/3-->
-<!--            if len(res("hebrewCleanMore"))>0 then-->
-<!--                psikArr = split(res("hebrewCleanMore"),",")-->
-<!--                for each psikWord in psikArr-->
-<!--                    if onlyLetters(strDisplay) = psikWord then-->
-<!--                        found = true-->
-<!--                        if ids = "" then ids = res("id") else ids = ids & "," & res("id")-->
-<!--                    end if-->
-<!--                next-->
-<!--            end if-->
-
-<!--            'CHECK FOR MORE EXACT RESULTS 2/3-->
-<!--            if len(res("arabicCleanMore"))>0 then-->
-<!--                psikArr = split(res("arabicCleanMore"),",")-->
-<!--                for each psikWord in psikArr-->
-<!--                    if onlyLetters(strDisplay) = psikWord then-->
-<!--                        found = true-->
-<!--                        if ids = "" then ids = res("id") else ids = ids & "," & res("id")-->
-<!--                    end if-->
-<!--                next-->
-<!--            end if-->
-
-<!--            'CHECK FOR MORE EXACT RESULTS 3/3-->
-<!--            if len(res("arabicHebCleanMore"))>0 then-->
-<!--                psikArr = split(res("arabicHebCleanMore"),",")-->
-<!--                for each psikWord in psikArr-->
-<!--                    if onlyLetters(strDisplay) = psikWord then-->
-<!--                        found = true-->
-<!--                        if ids = "" then ids = res("id") else ids = ids & "," & res("id")-->
-<!--                    end if-->
-<!--                next-->
-<!--            end if-->
-
-
-
-          {% for word in exact_match_words %}
-
-                <div class="exact">
-                    {{ word_result(word) }}
-                </div>
-
-     {% endfor %}
 
 <h2 id='cnt2'>מילים שנשמעות כמו מה שחיפשתם<span style='font-size:.7em; float:left; padding-left:4px;'>{{sound_index}}</span></h2>
 
-
-              {% for word in sound_like_words %}
+    {% for word in sound_like_words %}
 
                 <div>
                     {{ word_result(word) }}
                 </div>
 
      {% endfor %}
-
-
-
-<!--    dim sndx,searchNumber,searchTitle,divClass,searchSQL,countID,skipSndx-->
-<!--    if len(strClean)>1 then searchNumber=2 else searchNumber=5-->
-<!--    sndx = soundex(strClean)-->
-
-<!--    do until searchNumber=5-->
-<!--        skipSndx = false-->
-<!--        SELECT CASE searchNumber-->
-<!--        case 2-->
-<!--            if len(sndx)>0 then-->
-<!--                searchTitle = "<h2 id='cnt2'>מילים שנשמעות כמו מה שחיפשתם<span style='font-size:.7em; float:left; padding-left:4px;'>"&sndx&"</span></h2>"-->
-<!--                divClass = "soundexed"-->
-<!--                searchSQL = "SELECT words.*, wordsMedia.mediaID FROM words LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE ((sndxArabicV1 = '"& sndx &"') OR (sndxHebrewV1 = '"& sndx &"')) AND show"-->
-<!--                countID = "count2"-->
-<!--            else-->
-<!--                skipSndx = true-->
-<!--            end if-->
-<!--        case 3-->
-<!--            searchTitle = "<h2 id='cnt3'>מילים עם רצף האותיות שחיפשתם</h2>"-->
-<!--            divClass = "like"-->
-<!--            searchSQL = "SELECT TOP 50 words.*, wordsMedia.mediaID FROM words LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE ((hebrewClean LIKE '%"& strClean &"%') OR (arabicClean LIKE '%"& strDisplay &"%') OR (arabicHebClean LIKE '%"& strDisplay &"%')) AND show"-->
-<!--            countID = "count3"-->
-<!--        case 4-->
-<!--            searchTitle = "<h2 id='cnt4'>תוצאות נוספות : שגיאות נפוצות, מילים נרדפות ועוד</h2>"-->
-<!--            divClass = "searchWords"-->
-<!--            searchSQL = "SELECT TOP 50 words.*, wordsMedia.mediaID FROM words LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE searchString LIKE '%"& strDisplay &"%' AND show"-->
-<!--            countID = "count4"-->
-<!--        END SELECT-->
-<!--        searchNumber = searchNumber+1-->
-
-
-<!--        if skipSndx = false then %>-->
-<!--            <%=searchTitle%>-->
-<!--            <div class="<%=divClass%>"><%-->
-
-<!--                startTime = timer()-->
-<!--                'openDB "arabicWords"-->
-<!--                openDbLogger "arabicWords","O","default.asp",divClass,strClean-->
-
-<!--                mySQL = searchSQL-->
-<!--                res.open mySQL, con-->
-<!--                if not res.EOF then-->
-<!--                    Do until res.EOF-->
-<!--                        idx=Split(ids,",")-->
-<!--                        for each id in idx-->
-<!--                            if id=cstr(res("id")) then skip=true-->
-<!--                        next-->
-<!--                        if skip = false then %>-->
-<!--                            <div class="result" onclick="location.href='word.asp?id=<%=res("id")%>';">-->
-<!--                                <div class="heb" style="position:relative;"><a href="word.asp?id=<%=res("id")%>"><%=res("hebrewTranslation")%></a><%-->
-<!--                                    if len(res("hebrewDef"))>0 then %>-->
-<!--                                        <span class="def">(<%=res("hebrewDef")%>)</span><%-->
-<!--                                    end if %>-->
-<!--                                        <span class="icons"><%-->
-<!--                                    if len(res("imgLink"))>0 then %>-->
-<!--                                        <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" /><%-->
-<!--                                    end if-->
-<!--                                    if res("mediaID") then %>-->
-<!--                                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/><%-->
-<!--                                    end if-->
-<!--                                    Select Case res("status")-->
-<!--                                        Case 1 %>-->
-<!--                                            <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" /><%-->
-<!--                                        Case -1 %>-->
-<!--                                            <mark>ערך בבדיקה</mark><%-->
-<!--                                        Case Else %>-->
-<!--                                            <mark>טרם נבדק</mark><%-->
-<!--                                    End Select %>-->
-<!--                                </div>-->
-<!--                                <div class="arb"><%=res("arabic")%></div>-->
-<!--                                <div class="arb" style="font-size:1.6em;"><%=res("arabicWord")%></div>-->
-<!--                                <div class="eng"><%=res("pronunciation")%></div>-->
-<!--                            </div><%-->
-<!--                            countMe = countMe+1-->
-<!--                        end if-->
-<!--                        if ids = "" then ids = res("id") else ids = ids & "," & res("id")-->
-<!--                        skip = false-->
-<!--                        res.moveNext-->
-<!--                    Loop-->
-<!--                end if-->
-<!--                res.close-->
-<!--                endTime = timer()-->
-<!--                durationMs = Int((endTime - startTime)*1000)-->
-
-<!--                'closeDB-->
-<!--                closeDbLogger "arabicWords","C","default.asp",divClass,durationMs,strClean %>-->
-<!--            </div>-->
-<!--            <span id="<%=countID%>" data-count="<%=countMe%>" style="display:none;"></span><%-->
-<!--            if (countMe>0) and (resultPos=0) then resultPos=2 'no exact results-->
-<!--            if (countMe=0) and (resultPos=0) then resultPos=9 'no results-->
-<!--            countMe=0 'reset-->
-<!--        end if-->
-<!--    loop-->
-<!--end if %>-->
-
-
-<!--&lt;!&ndash; RESULTS FROM SENTENCES &ndash;&gt;<%-->
-<!--if len(strClean)>0 AND inStr(strDisplay," ")>0 then-->
-<!--    startTime = timer()-->
-<!--    'openDB "arabicWords"-->
-<!--    openDbLogger "arabicWords","O","default.asp","Sentences",strClean-->
-<!--    mySQL = "SELECT sentences.* FROM sentences WHERE ((hebrewClean LIKE '%"& strClean &"%') OR (arabicClean LIKE '%"& strClean &"%') OR (arabicHebClean LIKE '%"& strClean &"%')) AND show"-->
-<!--    res.open mySQL, con-->
-<!--    if res.EOF then-->
-<!--        if resultPos=1 then resultPos = 11-->
-<!--        if resultPos=2 then resultPos = 21-->
-<!--        if resultPos=9 then resultPos = 91-->
-<!--    else %>-->
-<!--        <h2 id="test5">ניסוי - תוצאות חיפוש ממשפטים</h2><%-->
-<!--        Do until res.EOF %>-->
-<!--            <div class="result" onclick="location.href='sentence.asp?sID=<%=res("id")%>'">-->
-<!--                <div class="heb"><%=res("hebrew")%></div>-->
-<!--                <div class="arb"><%=res("arabic")%></div>-->
-<!--                <div class="arb"><%=res("arabicHeb")%></div>-->
-<!--            </div><%-->
-<!--            res.moveNext-->
-<!--        loop-->
-<!--    end if-->
-<!--    endTime = timer()-->
-<!--    durationMs = Int((endTime - startTime)*1000)-->
-<!--    'closeDB-->
-<!--    closeDbLogger "arabicWords","C","default.asp","Sentences",durationMs,strClean-->
-<!--end if %>-->
-
-
 
 
 {% if not is_search_string_valid %}
@@ -536,29 +319,10 @@
 {% endif %}
 
 
-
-<!--<%-->
-<!--dim fromApp-->
-<!--fromApp = false-->
-<!--if request("app") = "androidFromPortal" then fromApp = true-->
-<!--if fromApp then %>-->
-<!--<div style="background:#ffff0087; padding:10px 30px ;-->
-<!--        border-radius:10px; font-size:1.1em; text-align:center;  margin-bottom:20px;">-->
-<!--        <b>גולשים מהאפליקציה?</b>-->
-<!--        <br>-->
-<!--        המילון עובר בימים אלה לבית המאמץ החדש שלו במדרסה. בקרוב תצא גרסה עדכנית לאפליקציה שלא תפתח לכם את המילון בדפדפן של הטלפון.-->
-<!--        <br>-->
-<!--        תודה על סבלנותכם-->
-<!--</div>-->
-<!--<%-->
-<!--end if-->
-<!--%>-->
-
-
 <div id="madrasa-welcome">
     <div class="madrasa-welcome-img">
         <a href="https://madrasafree.com" target="_blank">
-            <img src="../static/images/madrasa.png" alt="Madrasa's logo" width="120">
+            <img src="../static/images/site/madrasa.png" alt="Madrasa's logo" width="120">
         </a>
     </div>
 
@@ -599,7 +363,7 @@
     <div >
         <a href="https://rothfarb.info/ronen/arabic/"  style="line-height:16px;" target="_blank" ><div style="background-color:#c0dbf8">
         פורטל ערבית מדוברת
-        <img style="height:100%;opacity:1;" src="../static/images/logo.png"/>
+        <img style="height:100%;opacity:1;" src="../static/images/site/logo.png"/>
         </div></a>
     </div>
 </div>

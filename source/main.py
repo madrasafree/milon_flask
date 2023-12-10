@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from sound_index_function import get_sound_index
+from sound_index_function import get_sound_index, get_clean_word
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import func
 from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, Sentences
 from includes_utils import get_top_variables, get_trailer_variables
-
+from config.config import config
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -98,6 +98,9 @@ def sentences_handler():
 def guide_handler():
     return render_template("guide.html")
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('not_found.html'), 404
 
 @dataclass
 class Image:
@@ -123,15 +126,15 @@ def root_handler():
     label_data_dicts = get_label_data_dicts()
     search_string = request.args.get("searchString", "")
     search_string = search_string.strip()
+    cleaned_word = get_clean_word(search_string)
 
-    if search_string.isalpha():  # TODO
+    if len(cleaned_word)!=0:
         is_search_string_valid = True
 
         with ArabicWordsDB() as arabic_words_db:
             exact_match_words = arabic_words_db.session. \
                 query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
                       Words.pronunciation).filter(Words.hebrewClean == search_string).all()
-
         sound_index = get_sound_index(search_string)
 
         with ArabicWordsDB() as arabic_words_db:
@@ -139,7 +142,6 @@ def root_handler():
                 query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
                       Words.pronunciation).filter(Words.sndxArabicV1.like(f"%{sound_index}%"),
                                                   Words.sndxHebrewV1.like(f"%{sound_index}%")).all()
-
 
     else:
         is_search_string_valid = False

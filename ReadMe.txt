@@ -1,7 +1,7 @@
 Dear Developers,
 Welcome to Madrasa community dictionary repository!
 
-To compile the repository one must:
+To compile the repository locally in DEV mode one must:
 1. Install "Python" environment 3.7 or newer.
 2. Clone the Repository locally from Github:
 	https://github.com/madrasafree/milon_flask
@@ -11,7 +11,7 @@ To compile the repository one must:
 	https://www.postgresql.org/download/
 5. Open Firewall Port for PostgreSQL:
 	https://www.project-open.com/en/howto-postgresql-port-secure-remote-access
-6. Open "pgAdmin 4" control panel:
+6. Open "pgAdmin 4" control panel: (Address: http://127.0.0.1:50454/browser/#)
 	a. Set a password (1234)
 	b. Create new server:
 		Object -> Create -> Server:
@@ -20,11 +20,14 @@ To compile the repository one must:
 		Tools -> Query Tool -> paste and run the Query from repository under /milon_flask/research/create_tables.sql
 	d. Confirm you find the tables:
 		Browser -> "madrasa_flask" -> Databases -> postgres -> Schemas -> pubic -> Tables
-7. Edit source/arabic_words_db.py with Host Address, Port, Username, Password, Maintenance database.
-8. Edit source/main.py with Host Address and different Port (5431).
-9. Install "Microsoft Access Database Engine":
+7. Edit source/arabic_words_db.py with Host Address, Port, Username, Maintenance database.
+8. Add Password to Windows "Environment Variables" under name: "MADRASA_SERVER_KEY_SECRET_DEV"
+9. Edit source/main.py with Host Address and different Port (5431).
+10. Install "Microsoft Access Database Engine":
 	https://www.microsoft.com/en-us/download/details.aspx?id=54920
-10. Load PostgreSQL with Dictionary DataBase file .mdb by running:
+11. Load PostgreSQL with Dictionary DataBase file .mdb by running:
 	python -m research.import_db_from_windows
-10. Start-up the dictionary locally by running:
-	python -m source.main
+12. Start-up the dictionary locally by running:
+	cd source
+	python -m main
+13. Open from Chrome the host address

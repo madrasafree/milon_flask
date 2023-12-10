@@ -1,6 +1,8 @@
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 import json
+from config.config import config
 
 from sqlalchemy import Column, create_engine, inspect
 from sqlalchemy.dialects.postgresql import TEXT, TIMESTAMP, BOOLEAN, INTEGER
@@ -20,11 +22,11 @@ PUBLIC_SCHEMA = {"schema": "public"}
 
 
 
-
+load_dotenv()
 user_name = "postgres"
-password = ""   # TODO: ADD PASSWORD!
-# host = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
-# host = "localhost"                                                        # LOCAL DEVELOPMENT
+password = config["DEV"].API_TOKEN   # TODO: ADD PASSWORD TO ENVIRONMENT VARIABLE UNDER "MADRASA_SERVER_KEY_SECRET_DEV"
+# host_address = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
+# host_address = "localhost"                                                        # LOCAL DEVELOPMENT
 host_address = "127.0.0.1"                                                          # LOCAL DEVELOPMENT
 port = "5432"
 #mdb = "arabic_words_db"
