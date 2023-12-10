@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from sound_index_function import get_sound_index, get_clean_word
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import func
-from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, Sentences
+from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences
 from includes_utils import get_top_variables, get_trailer_variables
 from config.config import config
 
@@ -123,38 +123,73 @@ def games_mem_handler():
 
 @app.route("/")
 def root_handler():
+
+    # INITIALIZE VARIABLES
+    is_search_string_valid = True
+    label_data_dicts = []
+    cleaned_word = ""
+    sound_index = ""
+    exact_match_words = []
+    sound_like_words = []
+    letter_like_words = []
+    search_words = []
+    short_words = []
+
     label_data_dicts = get_label_data_dicts()
     search_string = request.args.get("searchString", "")
-    search_string = search_string.strip()
-    cleaned_word = get_clean_word(search_string)
+    search_string_strip = search_string.strip()
+    cleaned_word = get_clean_word(search_string_strip)
+    
+    if len(cleaned_word)>0:
+        if (len(cleaned_word)>1):
+            # CASE 1: "Identical": Words exactly as searched
+            with ArabicWordsDB() as arabic_words_db:
+                exact_match_words = arabic_words_db.session. \
+                    query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+                        Words.pronunciation).filter(Words.hebrewClean == search_string_strip).all()
+            
+            # CASE 2: "Soundex": Words sound like
+            sound_index = get_sound_index(search_string_strip)
+            if (len(sound_index)>0):
+                with ArabicWordsDB() as arabic_words_db:
+                    sound_like_words = arabic_words_db.session. \
+                        query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+                            Words.pronunciation).filter(Words.sndxArabicV1.like(f"%{sound_index}%"),
+                                                        Words.sndxHebrewV1.like(f"%{sound_index}%")).all()
 
-    if len(cleaned_word)!=0:
-        is_search_string_valid = True
+            # CASE 3: "Like": Words with same letters
+            with ArabicWordsDB() as arabic_words_db:
+                letter_like_words = arabic_words_db.session. \
+                    query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+                        Words.pronunciation).filter(Words.hebrewClean.like(f"%{cleaned_word}%")).all()
 
-        with ArabicWordsDB() as arabic_words_db:
-            exact_match_words = arabic_words_db.session. \
-                query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                      Words.pronunciation).filter(Words.hebrewClean == search_string).all()
-        sound_index = get_sound_index(search_string)
-
-        with ArabicWordsDB() as arabic_words_db:
-            sound_like_words = arabic_words_db.session. \
-                query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                      Words.pronunciation).filter(Words.sndxArabicV1.like(f"%{sound_index}%"),
-                                                  Words.sndxHebrewV1.like(f"%{sound_index}%")).all()
-
+            # CASE 4: "SearchWords": Additional results: Typical errors, Synonyms
+            with ArabicWordsDB() as arabic_words_db:
+                search_words = arabic_words_db.session. \
+                    query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+                        Words.pronunciation).filter(Words.searchString.like(f"%{search_string}%")).all()
+        #else:
+        #     "ShortWords": One letter only
+        #    with ArabicWordsDB() as arabic_words_db:
+        #        short_words = arabic_words_db.session. \
+        #            query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
+        #                Words.pronunciation) \
+        #                .filter(WordsShort.ID).all() \
+        #                .filter(WordsShort.sStr == cleaned_word).all()
     else:
-        is_search_string_valid = False
-        exact_match_words = []
-        sound_index = ""
-        sound_like_words = []
-
+        if (len(cleaned_word) == 0) and (len(cleaned_word)>0):
+            is_search_string_valid = False
+  
     return render_template("default.html",
                            label_data_dicts=label_data_dicts,
                            is_search_string_valid=is_search_string_valid,
-                           exact_match_words=exact_match_words,
+                           cleaned_word=cleaned_word,
                            sound_index=sound_index,
-                           sound_like_words=sound_like_words)
+                           exact_match_words=exact_match_words,
+                           sound_like_words=sound_like_words,
+                           letter_like_words=letter_like_words,
+                           search_words=search_words,
+                           short_words=short_words)
 
 if __name__ == '__main__':
     #app.run(host="192.168.2.109", port=5000, debug=True)

@@ -184,32 +184,36 @@
                 float: none;
         }
     </style>
+
+    <script type="text/javascript" src="static/javascript/soundex.js"></script>     <!-- Original soundex() in JS -->
+
     <script>
         $(document).ready(function(){
 
             // HIDDEN ON PAGE LOAD
             $("#tagsCloud").hide();
-            
+
             // SHOWING NUMBERS NEXT TO SEARCH RESULTS
-            var cnt1 = $("#count1").data("count");
-            
+            var cnt1 = '{{ exact_match_words|length }}';    // CASE 1 :"Identical": Words exactly as searched
             if (cnt1 >= 1) $("#msgRsltsExct").show();
             if (cnt1 == 0) $("#msgRsltsZeroExct").show();
             if (cnt1 > 1) $("#cnt1").prepend(cnt1+" תוצאות מדויקות");
-            if (cnt1 == 1) $("#cnt1").prepend("תוצאה מדויקת אחת")
-            
-            var cnt2 = $("#count2").data("count"); //SOUNDEX
+            if (cnt1 == 1) $("#cnt1").prepend("תוצאה מדויקת אחת");
+          
+            var cnt2 = '{{ sound_like_words|length }}';     // CASE 2 :"Soundex": Words sound like
             if (cnt2 > 1) $("#cnt2").prepend(cnt2+" ");
-            if (cnt2 == 0) $("#cnt2").hide();
-            var cnt3 = $("#count3").data("count");
+            if (cnt2 == 0) $("#cnt2").hide(); 
+
+            var cnt3 = '{{ letter_like_words|length }}';    // CASE 3 :"Like": Words with same letters
             if (cnt3 > 1) $("#cnt3").prepend(cnt3+" ");
             if (cnt3 == 0) $("#cnt3").hide();
-            var cnt4 = $("#count4").data("count");
+            
+
+            var cnt4 = '{{ search_words|length }}';         // CASE 4 :"SearchWords": Additional results: Typical errors, Synonyms
             if (cnt4 > 1) $("#cnt4").prepend(cnt4+" ");
             if (cnt4 == 0) $("#cnt4").hide();
 
-
-            var cntRest = cnt2 + cnt3 + cnt4;
+            var cntRest = Number(cnt2) + Number(cnt3) + Number(cnt4);
             if (cntRest > 1) $("#cntRest").prepend(" | "+cntRest+" תוצאות נוספות");
             if (cntRest == 0) $("#cntRest").prepend(" | ללא תוצאות נוספות");
             if (cntRest == 1) $("#cntRest").prepend(" | תוצאה נוספת אחת");
@@ -220,9 +224,20 @@
             if (cntAll == 0) $("#msgRsltsZeroExct").hide();
             if (cntAll == 0) $("#msgRsltsNone").show();
 
-            if ($("#count3").data("count") == undefined) $("#msgRsltsZeroExct").hide();
-            if (($("#count3").data("count") == undefined) && (cnt1 == 0)) $("#msgRsltsNoneShort").show();
+            //if ($("#count3").data("count") == undefined) $("#msgRsltsZeroExct").hide();
+            //if (($("#count3").data("count") == undefined) && (cnt1 == 0)) $("#msgRsltsNoneShort").show();
+            
+            if ((cnt3 == 0) && (cnt1 == 0 ) && (cnt2 == 0) & (cnt2 == 0)) $("#msgRsltsNoneShort").show();
 
+            // DEBUG
+            console.log("cleaned_word = " + '{{ cleaned_word }}');
+            console.log("soundex_JS = " + soundex('{{ cleaned_word }}'));
+            console.log("soundex_Python = " + '{{ sound_index }}');
+            console.log("cnt1 = " + cnt1);
+            console.log("cnt2 = " + cnt2);
+            console.log("cnt3 = " + cnt3);
+            console.log("cnt4 = " + cnt4);
+            
             // HIDES / UNHIDES LABELS LIST
             $("#tagsTile").click(function(){
                 $("#tagsCloud").slideToggle();
@@ -234,7 +249,7 @@
 </head>
 <body>
     {% include 'includes/top.html' %}
-    {% include 'includes/soundex.html' %}
+
 
 
 <div class="box">

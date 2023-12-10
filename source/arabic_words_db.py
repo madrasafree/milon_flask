@@ -21,7 +21,7 @@ Base = declarative_base()
 PUBLIC_SCHEMA = {"schema": "public"}
 
 
-
+# DEVELOPMENT SERVER CONFIGURATION:
 load_dotenv()
 user_name = "postgres"
 password = config["DEV"].API_TOKEN   # TODO: ADD PASSWORD TO ENVIRONMENT VARIABLE UNDER "MADRASA_SERVER_KEY_SECRET_DEV"
