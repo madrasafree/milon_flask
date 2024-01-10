@@ -10,7 +10,6 @@
     {% from "includes/word_result_macro.html" import word_result %}
     <title>מילון ערבית מדוברת - לדוברי עברית</title>
     <meta name="Description" content="המילון לערבית מדוברת (לדוברי עברית) הוא שירות חינמי שנועד לעזור לקהילת לומדי הערבית המדוברת" />
-    <!--meta name="Keywords" content="מילון, ערבית, מדוברת, עברית, עברי, ערבי, חופשי, חינם, חינמי, תרגום, תירגום, מילים, איך, אומרים, בערבית" /> up to 2021-06 -->
     <meta name="Keywords" content="מילון עברי ערבי, תרגום עברית ערבית, מילון ערבי עברי, תרגום מעברית לערבית, תרגום ערבית עברית, מתרגם עברית ערבית" /> <!-- since 2021-06 -->
     <meta property="og:title" content="מילון ערבית מדוברת - לדוברי עברית" />
     <meta property="og:description" content="המילון לערבית מדוברת (לדוברי עברית) הוא שירות חינמי שנועד לעזור לקהילת לומדי הערבית המדוברת" />
@@ -199,18 +198,21 @@
             if (cnt1 == 0) $("#msgRsltsZeroExct").show();
             if (cnt1 > 1) $("#cnt1").prepend(cnt1+" תוצאות מדויקות");
             if (cnt1 == 1) $("#cnt1").prepend("תוצאה מדויקת אחת");
-          
+            // TODO: if (cnt1 == 0) $("#cnt1").hide(); ???
+
             var cnt2 = '{{ sound_like_words|length }}';     // CASE 2 :"Soundex": Words sound like
-            if (cnt2 > 1) $("#cnt2").prepend(cnt2+" ");
+            if (cnt2 > 1) $("#cnt2").prepend(cnt2+" מילים שנשמעות ");
+            if (cnt2 == 1) $("#cnt2").prepend("מילה אחת שנשמעת ");
             if (cnt2 == 0) $("#cnt2").hide(); 
 
             var cnt3 = '{{ letter_like_words|length }}';    // CASE 3 :"Like": Words with same letters
-            if (cnt3 > 1) $("#cnt3").prepend(cnt3+" ");
+            if (cnt3 > 1) $("#cnt3").prepend(cnt3+" מילים ");
+            if (cnt3 == 1) $("#cnt3").prepend("מילה אחת ");
             if (cnt3 == 0) $("#cnt3").hide();
-            
 
             var cnt4 = '{{ search_words|length }}';         // CASE 4 :"SearchWords": Additional results: Typical errors, Synonyms
-            if (cnt4 > 1) $("#cnt4").prepend(cnt4+" ");
+            if (cnt4 > 1) $("#cnt4").prepend(cnt4+" תוצאות נוספות ");
+            if (cnt4 == 1) $("#cnt4").prepend("תוצאה נוספת אחת");
             if (cnt4 == 0) $("#cnt4").hide();
 
             var cntRest = Number(cnt2) + Number(cnt3) + Number(cnt4);
@@ -313,19 +315,28 @@
     {% endif %}
 {% endif %}
 
-<h2 id='cnt2'>מילים שנשמעות כמו מה שחיפשתם<span style='font-size:.7em; float:left; padding-left:4px;'>{{sound_index}}</span></h2>
+<h2 id='cnt2'>כמו מה שחיפשתם<span style='font-size:.7em; float:left; padding-left:4px;'>{{sound_index}}</span></h2>
+{% for word in sound_like_words %}
+    <div>
+        {{ word_result(word) }}
+    </div>
+{% endfor %}
 
-    {% for word in sound_like_words %}
+<h2 id='cnt3'>עם רצף האותיות שחיפשתם<span style='font-size:.7em; float:left; padding-left:4px;'></span></h2>
+{% for word in letter_like_words %}
+    <div>
+        {{ word_result(word) }}
+    </div>
+{% endfor %}
 
-                <div>
-                    {{ word_result(word) }}
-                </div>
+<h2 id='cnt4'>: שגיאות נפוצות, מילים נרדפות ועוד<span style='font-size:.7em; float:left; padding-left:4px;'></span></h2>
+{% for word in search_words %}
+    <div>
+        {{ word_result(word) }}
+    </div>
+{% endfor %}
 
-     {% endfor %}
-
-
-{% if not is_search_string_valid %}
-
+{% if is_search_string_valid %}
     <div class="notice info" onclick="location.href='guide.asp'">
         הסבר על התעתיק
     </div>
