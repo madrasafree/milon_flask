@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from sound_index_function import get_sound_index, get_clean_word
 from flask import Flask, redirect, url_for, request, render_template
-from sqlalchemy import func, and_, or_, not_
-from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia
+from sqlalchemy import select, func, and_, or_, not_
+from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media
 from includes_utils import get_top_variables, get_trailer_variables
 from config.config import config
 
@@ -98,6 +98,10 @@ def sentences_handler():
 def guide_handler():
     return render_template("guide.html")
 
+@app.route("/word.asp")
+def word_handler():
+    return render_template("word.html")
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('not_found.html'), 404
@@ -144,7 +148,10 @@ def root_handler():
     print("search_string = " + search_string)
     print("search_string_strip = " + search_string_strip)
     print("cleaned_word = " + cleaned_word)
-    
+
+    query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
+                        Words.imgLink, WordsMedia.wordID, WordsMedia.mediaID, Media.id }
+
     invalid_word_filter = and_(
         Words.show == "True",
         Words.hebrewTranslation != "None",
@@ -156,48 +163,43 @@ def root_handler():
         if (len(cleaned_word)>1):
             # CASE 1: "Identical": Words exactly as searched
             with ArabicWordsDB() as arabic_words_db:
-                exact_match_words = arabic_words_db.session. \
-                    query(Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                        Words.pronunciation).filter(and_(invalid_word_filter,       # TODO: FIX!
-                                                        Words.hebrewTranslation.contains(search_string_strip),
-                                                        or_(Words.hebrewClean.contains(cleaned_word),
-                                                            Words.arabicHebClean.contains(cleaned_word),
-                                                            Words.arabicClean.contains(cleaned_word))
-                                                        )).all()
-            
+                exact_match_words = arabic_words_db.session.query(*query_columns)    \
+                    .filter(and_(invalid_word_filter,       # TODO: FIX!
+                                or_(Words.hebrewClean == cleaned_word,
+                                    Words.arabicClean == cleaned_word,
+                                    Words.arabicHebClean == cleaned_word)
+                                )).all()
+
             # CASE 2: "Soundex": Words sound like
             sound_index = get_sound_index(search_string_strip)
             if (len(sound_index)>0):
                 with ArabicWordsDB() as arabic_words_db:
-                    sound_like_words = arabic_words_db.session. \
-                        query(Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                            Words.pronunciation).filter(and_(invalid_word_filter,
-                                                            or_(Words.sndxArabicV1.like(f"%{sound_index}%"),
-                                                                Words.sndxHebrewV1.like(f"%{sound_index}%"))
-                                                            )).all()
+                    sound_like_words = arabic_words_db.session.query(*query_columns) \
+                        .filter(and_(invalid_word_filter,
+                                    or_(Words.sndxArabicV1.like(f"%{sound_index}%"),
+                                        Words.sndxHebrewV1.like(f"%{sound_index}%"))
+                                    )).all()
 
             # CASE 3: "Like": Words with same letters
             with ArabicWordsDB() as arabic_words_db:
-                letter_like_words = arabic_words_db.session. \
-                    query(Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                        Words.pronunciation).filter(and_(invalid_word_filter,
-                                                        Words.hebrewClean.like(f"%{cleaned_word}%")
-                                                        )).all()
+                letter_like_words = arabic_words_db.session.query(*query_columns)    \
+                        .filter(and_(invalid_word_filter,
+                                    Words.hebrewClean.like(f"%{cleaned_word}%")
+                                    )).all()
 
             # CASE 4: "SearchWords": Additional results: Typical errors, Synonyms
             with ArabicWordsDB() as arabic_words_db:
-                search_words = arabic_words_db.session. \
-                    query(Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                        Words.pronunciation).filter(and_(invalid_word_filter,
-                                                        Words.searchString.like(f"%{search_string}%")
-                                                        )).all()
+                search_words = arabic_words_db.session.query(*query_columns) \
+                        .filter(and_(invalid_word_filter,
+                                    Words.searchString.like(f"%{search_string}%")
+                                    )).all()
             
             # DEBUG
             print(exact_match_words)
             print(sound_like_words)
             print(letter_like_words)
             print(search_words)
-            
+
             # Remove duplications between lists!
             sound_like_words = [x for x in sound_like_words if x not in set(exact_match_words)]
             letter_like_words = [x for x in letter_like_words if x not in set(exact_match_words + sound_like_words)]
@@ -216,15 +218,16 @@ def root_handler():
             is_search_string_valid = False
   
     return render_template("default.html",
-                           label_data_dicts=label_data_dicts,
-                           is_search_string_valid=is_search_string_valid,
-                           cleaned_word=cleaned_word,
-                           sound_index=sound_index,
-                           exact_match_words=exact_match_words,
-                           sound_like_words=sound_like_words,
-                           letter_like_words=letter_like_words,
-                           search_words=search_words,
-                           short_words=short_words)
+                            search_string = search_string,
+                            label_data_dicts=label_data_dicts,
+                            is_search_string_valid=is_search_string_valid,
+                            cleaned_word=cleaned_word,
+                            sound_index=sound_index,
+                            exact_match_words=exact_match_words,
+                            sound_like_words=sound_like_words,
+                            letter_like_words=letter_like_words,
+                            search_words=search_words,
+                            short_words=short_words)
 
 if __name__ == '__main__':
     #app.run(host="192.168.2.109", port=5000, debug=True)
