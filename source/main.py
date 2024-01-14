@@ -100,7 +100,22 @@ def guide_handler():
 
 @app.route("/word.asp")
 def word_handler():
-    return render_template("word.html")
+    label_data_dicts = get_label_data_dicts()
+    word_id = request.args.get("id", "")
+    
+    query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
+                    Words.imgLink}#, WordsMedia.wordID, WordsMedia.mediaID, Media.id }
+
+    with ArabicWordsDB() as arabic_words_db:
+        word = arabic_words_db.session.query(*query_columns)    \
+            .filter(and_(Words.id == word_id)).first()
+    
+    print(word)
+
+    return render_template("word.html",
+                            word_id = word_id,
+                            word = word,
+                            label_data_dicts=label_data_dicts)
 
 @app.errorhandler(404)
 def page_not_found(e):
