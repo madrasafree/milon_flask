@@ -83,7 +83,7 @@
         #cnt2,#cnt3,#cnt4,#test5 {text-align:right; background:#fff5d7b8; padding-right:10px; border-right: 6px solid #8690ff; color:#8690ff; font-size:1em;}
         .eng {padding-left: 2px;}
         .exact {margin-bottom:10px;counter-increment: mega-step;}
-        .exact::before {counter-increment: exactCount; content: counter(mega-step);display: block; padding: 5px 5px 3px 5px; background: #ffffff; width: 10%; text-align: center; border: 1px solid #a5d0f3; border-bottom: 0; margin-top:20px;}
+        #exact::before {counter-increment: exactCount; content: counter(mega-step);display: block; padding: 5px 5px 3px 5px; background: #ffffff; width: 10%; text-align: center; border: 1px solid #a5d0f3; border-bottom: 0; margin-top:20px;}
         .heb {padding-bottom: 4px; padding-right: 2px;}
         .heb a:link,.heb a:visited {color:#1988cc !important;}
         .media {margin:0px auto 10px auto; text-align:center; max-width:700px;}
@@ -190,9 +190,9 @@
         $(document).ready(function(){
 
             // HIDDEN ON PAGE LOAD
-            $("#tagsCloud").hide();
+            $("#tagsCloud").show();
 
-            $("#msgRsltsExct").show();
+            //$("#msgRsltsExct").show();
             
             // HIDES / UNHIDES LABELS LIST
             $("#tagsTile").click(function(){
@@ -213,56 +213,6 @@
         {{ word_result(word) }}
     </div>
 
-<div id="madrasa-welcome">
-    <div class="madrasa-welcome-img">
-        <a href="https://madrasafree.com" target="_blank">
-            <img src="../static/images/site/madrasa.png" alt="Madrasa's logo" width="120">
-        </a>
-    </div>
-
-    <div class="madrasa-welcome-text">
-       <p style="text-align:center;padding:0 20px;">
-            ברוכים הבאים לדף הבית החדש של המילון החינמי והשיתופי לערבית מדוברת
-        </p>
-    </div>
-
-</div>
-
-<!-- TILE MENU-->
-<div id="boxMenu">
-    <div style="display:none;" id="communityTile">
-        <a href="activity.asp"><div data-gtm="tile_community">פעילות קהילה</div></a>
-    </div>
-    <div id="tagsTile">
-        <a href="#"><div data-gtm="tile_labels">רשימות נושאים</div></a>
-    </div>
-    <div>
-        <a href="lists.all.asp"><div data-gtm="tile_lists">הרשימות שלכם</div></a>
-    </div>
-    <div>
-        <a href="guide.asp"><div data-gtm="tile_guide">מדריך שימוש</div></a>
-    </div>
-    <div style="display:none;">
-        <a href="team.tasks.asp"><div data-gtm="tile_learn">דף משימות</div></a>
-    </div>
-    <div>
-        <a href="games.mem.asp"><div data-gtm="tile_games">משחק זיכרון</div></a>
-    </div>
-    <div style="display:none;">
-        <a href="test.asp"><div data-gtm="tile_links">ארגז חול</div></a>
-    </div>
-    <div style="display:none;">
-        <a href="stats.asp"><div data-gtm="tile_stats">סטטיסטיקה</div></a>
-    </div>
-    <div >
-        <a href="https://rothfarb.info/ronen/arabic/"  style="line-height:16px;" target="_blank" ><div style="background-color:#c0dbf8">
-        פורטל ערבית מדוברת
-        <img style="height:100%;opacity:1;" src="../static/images/site/logo.png"/>
-        </div></a>
-    </div>
-</div>
-
-
     {% include 'includes/label_tags_cloud.html' %}
 
 <script>
@@ -274,6 +224,7 @@
 
 
 {% include 'includes/trailer.html' %}
+
 
 </body>
 </html>

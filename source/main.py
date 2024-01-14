@@ -45,6 +45,48 @@ def get_label_data_dicts():
 
     return label_data_dicts
 
+def get_label_data_dicts_containing_word(word_id):
+    with ArabicWordsDB() as arabic_words_db:
+        rows = arabic_words_db.session.query(Labels.ID, Labels.labelName).all()
+
+    #TODO: Fix bug only one label is found. For example: "רופא" finds "רפואה" but not "מקצועות"
+    with ArabicWordsDB() as arabic_words_db:
+        wordsLabels = arabic_words_db.session.query(WordsLabels.wordID, WordsLabels.labelID). \
+            filter(WordsLabels.wordID == word_id).all()
+
+    labels_containing_word = [x.labelID for x in wordsLabels if x.wordID == word_id]
+    
+    label_data_dicts = []
+    for label_row in rows:
+        label_id = label_row.ID
+        label_name = label_row.labelName
+
+        if (label_id in labels_containing_word):
+            with ArabicWordsDB() as arabic_words_db:
+                word_count = arabic_words_db.session.query(func.count(WordsLabels.wordID)). \
+                    filter(WordsLabels.labelID == label_id).scalar()
+    
+                if word_count <= 10:
+                    tag_size = "0.8em"
+                elif 11 <= word_count <= 30:
+                    tag_size = "1em"
+                elif 71 <= word_count <= 120:
+                    tag_size = "1.5em"
+                elif 121 <= word_count <= 180:
+                    tag_size = "1.7em"
+                elif 180 <= word_count <= 300:
+                    tag_size = "1.9em"
+                else:
+                    tag_size = "2.4em"
+    
+            label_data_dict = {}
+            label_data_dict["name"] = label_name
+            label_data_dict["title"] = f"there are {word_count} words in this topic"
+            label_data_dict["href"] = f"label.asp?id={label_id}"
+            label_data_dict["style_string"] = f"font-size:{tag_size}"
+    
+            label_data_dicts.append(label_data_dict)
+    return label_data_dicts
 
 @app.route("/labels.asp")
 def labels_handler():
@@ -100,17 +142,15 @@ def guide_handler():
 
 @app.route("/word.asp")
 def word_handler():
-    label_data_dicts = get_label_data_dicts()
     word_id = request.args.get("id", "")
-    
+    label_data_dicts = get_label_data_dicts_containing_word(word_id)
+
     query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
-                    Words.imgLink}#, WordsMedia.wordID, WordsMedia.mediaID, Media.id }
+                    Words.imgLink, Words.partOfSpeach, Words.gender, Words.number}
 
     with ArabicWordsDB() as arabic_words_db:
         word = arabic_words_db.session.query(*query_columns)    \
             .filter(and_(Words.id == word_id)).first()
-    
-    print(word)
 
     return render_template("word.html",
                             word_id = word_id,

@@ -1,4 +1,4 @@
-{% macro word_result(word) -%}
+{% macro word_result(word) %}
 
 <div class="result" onclick="location.href='word.asp?id={{word.id}}';">
   <div class="heb" style="position: relative;">
@@ -13,48 +13,63 @@
           <img src="../static/images/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/>
           <img src="../static/images/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" />
         </span>
+  </div>
+  <div class="arb">{{ word.arabic }}</div>
+  <div class="arb" style="font-size:1.6em">{{ word.arabicWord }}</div>
+  <div class="eng">{{ word.pronunciation }}</div>
+  <div class="attr">
+      <div class="pos">
+       {% if (word.partOfSpeach == "0") %}
+       {{ "-" }}
+       {% elif (word.partOfSpeach == "1") %}
+       {{ "שם עצם" }}
+       {% elif (word.partOfSpeach == "2") %}
+       {{ "שם תואר" }}
+       {% elif (word.partOfSpeach == "3") %}
+       {{ "פועל" }}
+       {% elif (word.partOfSpeach == "4") %}
+       {{ "תואר הפועל" }}
+       {% elif (word.partOfSpeach == "5") %}
+       {{ "מילת יחס" }}
+       {% elif (word.partOfSpeach == "6") %}
+       {{ "מילת חיבור" }}
+       {% elif (word.partOfSpeach == 7) %}
+       {{ "מילת קריאה" }}
+       {% elif (word.partOfSpeach == 8) %}
+       {{ "תחילית" }}
+       {% elif (word.partOfSpeach == 9) %}
+       {{ "סופית" }}
+       {% endif %}
+      </div>
+      <div class="gender">
+        {% if (word.gender == "0") %}
+        {{ "נטרלי" }}
+        {% elif (word.gender == "1") %}
+        {{ "זכר" }}
+        {% elif (word.gender == "2") %}
+        {{ "נקבה" }}
+        {% elif (word.gender == "3") %}
+        {{ "-" }}
+        {% endif %}
+      </div>
+      <div class="number">
+        {% if (word.number == "0") %}
+        {{ "בלתי ספיר" }}
+        {% elif (word.number == "1") %}
+        {{ "יחיד" }}
+        {% elif (word.number == "2") %}
+        {{ "זוגי" }}
+        {% elif (word.number == "3") %}
+        {{ "רבים" }}
+        {% elif (word.number == "4") %}
+        {{ "-" }}
+        {% elif (word.number == "5") %}
+        {{ "לא רלוונטי" }}
+        {% elif (word.number == "6") %}
+        {{ "שם קיבוצי" }}
+        {% endif %}
+      </div>
+  </div>
 </div>
-<div class="arb">{{ word.arabic }}</div>
-<div class="arb" style="font-size:1.6em">{{ word.arabicWord }}</div>
-<div class="eng">{{ word.pronunciation }}</div>
-
-<!--                        <div class="attr">-->
-<!--                            <div class="pos"><%-->
-<!--                                SELECT CASE res("partOfSpeach")-->
-<!--                                    case 0 response.write "-"-->
-<!--                                    case 1 response.write "שם עצם"-->
-<!--                                    case 2 response.write "שם תואר"-->
-<!--                                    case 3 response.write "פועל"-->
-<!--                                        if res("binyan")=>1 then %><span style="font-size:small;"> (בניין <%=res("binyan")%>)</span><%end if-->
-<!--                                    case 4 response.write "תואר הפועל"-->
-<!--                                    case 5 response.write "מילית יחס"-->
-<!--                                    case 6 response.write "מילית חיבור"-->
-<!--                                    case 7 response.write "מילת קריאה"-->
-<!--                                    case 8 response.write "תחילית"-->
-<!--                                    case 9 response.write "סופית"-->
-<!--                                END SELECT %>-->
-<!--                            </div>-->
-<!--                            <div class="gender"><%-->
-<!--                                SELECT CASE res("gender")-->
-<!--                                    case 0 response.write "נטרלי"-->
-<!--                                    case 1 response.write "זכר"-->
-<!--                                    case 2 response.write "נקבה"-->
-<!--                                    case 3 response.write "-"-->
-<!--                                END SELECT %>-->
-<!--                            </div>-->
-<!--                            <div class="number"><%-->
-<!--                                SELECT CASE res("number")-->
-<!--                                    case 0 response.write "בלתי ספיר"-->
-<!--                                    case 1 response.write "יחיד"-->
-<!--                                    case 2 response.write "זוגי"-->
-<!--                                    case 3 response.write "רבים"-->
-<!--                                    case 4 response.write "-"-->
-<!--                                    case 5 response.write "לא רלוונטי"-->
-<!--                                    case 6 response.write "שם קיבוצי"-->
-<!--                                END SELECT %>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-                    </div>
 
 {%- endmacro %}
