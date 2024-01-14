@@ -150,7 +150,7 @@ def root_handler():
     print("cleaned_word = " + cleaned_word)
 
     query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
-                        Words.imgLink, WordsMedia.wordID, WordsMedia.mediaID, Media.id }
+                        Words.imgLink}#, WordsMedia.wordID, WordsMedia.mediaID, Media.id }
 
     invalid_word_filter = and_(
         Words.show == "True",

@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import pyodbc
 from tqdm import tqdm
-from source.arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
+from arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
                                     ListsUsers, Log, Media, Sentences, Words,
                                     WordsLabels, WordsLists, WordsMedia,
                                     WordsRelations, WordsSentences, WordsShort)
@@ -39,7 +39,7 @@ table_names = "history labels lists listsUsers log media sentences words wordsLa
 
 for table_name in table_names:
     print(table_name)
-    if table_name != "words":
+    if ((table_name != "words") and (table_name != "wordsMedia") and (table_name != "media")):
         continue
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
     cur = con.cursor()

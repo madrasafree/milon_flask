@@ -26,8 +26,10 @@ To compile the repository locally in DEV mode one must:
 10. Install "Microsoft Access Database Engine":
 	https://www.microsoft.com/en-us/download/details.aspx?id=54920
 11. Load PostgreSQL with Dictionary DataBase file .mdb by running:
-	python -m research.import_db_from_windows
+	a. copy research/import_db_from_windows.py to source folder
+	b. cd source
+	c. python -m import_db_from_windows
 12. Start-up the dictionary locally by running:
-	cd source
-	python -m main
-13. Open from Chrome the host address
+	a. cd source
+	b. python -m main
+13. Open from Chrome the host address (http://127.0.0.1:5431/)
