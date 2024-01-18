@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 from config.config import config
 
-from sqlalchemy import Column, create_engine, inspect
+from sqlalchemy import Column, create_engine, inspect, UniqueConstraint, ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import TEXT, TIMESTAMP, BOOLEAN, INTEGER
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -222,11 +222,15 @@ class Words(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
 class WordsLabels(Base):
     __tablename__ = "wordsLabels"
-    __table_args__ = PUBLIC_SCHEMA
-    wordID = Column(TEXT, primary_key=True)
+    #__table_args__ = PUBLIC_SCHEMA
+    wordID = Column(TEXT)
     labelID = Column(TEXT)
+    __table_args__ = (
+        PrimaryKeyConstraint(wordID, labelID),
+    )
 
 
 class WordsLists(Base):
@@ -235,8 +239,8 @@ class WordsLists(Base):
     wordID = Column(TEXT, primary_key=True)
     listID = Column(TEXT)
     pos = Column(TEXT)
-
-
+    
+    
 class WordsMedia(Base):
     __tablename__ = "wordsMedia"
     __table_args__ = PUBLIC_SCHEMA

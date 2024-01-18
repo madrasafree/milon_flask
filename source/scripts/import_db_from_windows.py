@@ -1,8 +1,13 @@
-import os
+from tqdm import tqdm
 from pathlib import Path
 import pyodbc
-from tqdm import tqdm
-from source.arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
+import os
+import inspect
+import sys
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+from arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
                                     ListsUsers, Log, Media, Sentences, Words,
                                     WordsLabels, WordsLists, WordsMedia,
                                     WordsRelations, WordsSentences, WordsShort)

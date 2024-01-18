@@ -49,14 +49,13 @@ def get_label_data_dicts_containing_word(word_id):
     with ArabicWordsDB() as arabic_words_db:
         rows = arabic_words_db.session.query(Labels.ID, Labels.labelName).all()
 
-    #TODO: Fix bug only one label is found. For example: "רופא" finds "רפואה" but not "מקצועות"
     with ArabicWordsDB() as arabic_words_db:
-        wordsLabels = arabic_words_db.session.query(WordsLabels.wordID, WordsLabels.labelID). \
-            filter(WordsLabels.wordID == word_id).all()
-
-    labels_containing_word = [x.labelID for x in wordsLabels if x.wordID == word_id]
+        wordsLabels = arabic_words_db.session.query(WordsLabels). \
+            filter(WordsLabels.wordID == word_id).all() 
     
+    labels_containing_word = [x.labelID for x in wordsLabels if x.wordID == word_id]
     label_data_dicts = []
+    
     for label_row in rows:
         label_id = label_row.ID
         label_name = label_row.labelName
