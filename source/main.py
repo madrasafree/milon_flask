@@ -26,6 +26,8 @@ def get_label_data_dicts():
                 tag_size = "0.8em"
             elif 11 <= word_count <= 30:
                 tag_size = "1em"
+            elif 31 <= word_count <= 70:
+                tag_size = "1.3em"
             elif 71 <= word_count <= 120:
                 tag_size = "1.5em"
             elif 121 <= word_count <= 180:
@@ -37,9 +39,9 @@ def get_label_data_dicts():
 
         label_data_dict = {}
         label_data_dict["name"] = label_name
-        label_data_dict["title"] = f"there are {word_count} words in this topic"
+        label_data_dict["title"] = f"ישנן {word_count} מילים בנושא זה"
         label_data_dict["href"] = f"label.asp?id={label_id}"
-        label_data_dict["style_string"] = f"font-size:{tag_size}"
+        label_data_dict["style_string"] = f"font-size:{tag_size};"
 
         label_data_dicts.append(label_data_dict)
 
@@ -183,6 +185,7 @@ def games_mem_handler():
 def root_handler():
 
     # INITIALIZE VARIABLES
+    is_search_submitted = True
     is_search_string_valid = True
     is_search_string_short = False
     label_data_dicts = []
@@ -214,7 +217,11 @@ def root_handler():
         Words.arabicWord != "None"
     )
 
-    if len(cleaned_word) == 0:
+    if (len(search_string) == 0):
+        is_search_submitted = False
+        print("is_search_submitted = " + str(is_search_submitted))
+
+    if (len(cleaned_word) == 0):
         # CASE -1: Invalid Search due to Symbols or foreign Language
         is_search_string_valid = False
         print("is_search_string_valid = " + str(is_search_string_valid))
@@ -276,6 +283,7 @@ def root_handler():
     return render_template("default.html",
                             search_string = search_string,
                             label_data_dicts=label_data_dicts,
+                            is_search_submitted = is_search_submitted,
                             is_search_string_valid=is_search_string_valid,
                             is_search_string_short=is_search_string_short,
                             cleaned_word=cleaned_word,
