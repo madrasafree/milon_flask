@@ -4,6 +4,7 @@ import time_functions
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import select, func, and_, or_, not_
 from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
+from arabic_users_db import ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow
 from includes_utils import get_top_variables, get_trailer_variables
 from config.config import config
 
@@ -145,22 +146,20 @@ def lists_handler():
     print(list.privacy)
     print(list.type)
 
-    query_columns_listsUsers = { ListsUsers }
-    with ArabicWordsDB() as arabic_words_db:
-        listsUsers = arabic_words_db.session.query(*query_columns_listsUsers)    \
-            .filter(and_(ListsUsers.list == list_id)).first()
+    query_columns_users = { Users }
+    with ArabicUsersDB() as arabic_users_db:
+        user = arabic_users_db.session.query(*query_columns_users)    \
+            .filter(and_(Users.id == list.creator)).first()
 
-    print(listsUsers.list)
-    print(listsUsers.user)
-    print(listsUsers.pos)
+    print(user.username)
 
     query_columns_wordsLists = { WordsLists.wordID }
     with ArabicWordsDB() as arabic_words_db:
         wordsLists = arabic_words_db.session.query(*query_columns_wordsLists)    \
             .filter(and_(WordsLists.listID == list_id)).all()
 
-    print(len(wordsLists))
-    for word in wordsLists: print(word)
+    #print(len(wordsLists))
+    #for word in wordsLists: print(word)
 
     privacy_dict={
         0:["רשימה פרטית","lock"],

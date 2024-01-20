@@ -4,23 +4,20 @@ import pyodbc
 import os
 import inspect
 import sys
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
 from arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
                                     ListsUsers, Log, Media, Sentences, Words,
                                     WordsLabels, WordsLists, WordsMedia,
                                     WordsRelations, WordsSentences, WordsShort)
+from arabic_users_db import (ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow)
 
-# set up some constants
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
 current_dir =  os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.abspath(current_dir + "/../")
-db_file_path = Path(parent_dir + "\\database\\arabicWords.mdb")
-MDB = str(db_file_path)
-DRV = 'Microsoft Access Driver (*.mdb, *.accdb)'
-PWD = ''
 
-table_name_to_class_name = {
+# Constant variable
+table_name_to_class_name_arabicWords = {
     "history": History,
     "labels": Labels,
     "lists": Lists,
@@ -37,14 +34,41 @@ table_name_to_class_name = {
     "wordsShort": WordsShort
 }
 
+table_name_to_class_name_arabicUsers = {
+    "allowEdit": AllowEdit, 
+    "log":Log, 
+    "loginLog": LoginLog, 
+    "users": Users, 
+    "usersWordsFollow": UsersWordsFollow
+}
 
-table_names = "history labels lists listsUsers log media sentences words wordsLabels wordsLists wordsMedia " \
+table_names_arabicWords = "history labels lists listsUsers log media sentences words wordsLabels wordsLists wordsMedia " \
               "wordsRelations wordsSentences wordsShort".split()
+table_names_arabicUsers = "allowEdit log loginLog users usersWordsFollow".split()
 
+columns_to_load_filter_arabicWords = ["words", "wordsMedia", "media", "wordsLabels", "labels"]
+columns_to_load_filter_arabicUsers = ["users"]
+
+db_file_path_arabicWords = Path(parent_dir + "\\database\\arabicWords.mdb")
+db_file_path_arabicUsers = Path(parent_dir + "\\database\\arabicUsers.mdb")
+
+database_arabicWords = ArabicWordsDB()
+database_arabicUsers = ArabicUsersDB()
+
+# Editable Variables
+table_name_to_class_name = table_name_to_class_name_arabicUsers
+table_names = table_names_arabicUsers
+columns_to_load_filter = columns_to_load_filter_arabicUsers
+db_file_path = db_file_path_arabicUsers
+database = database_arabicUsers
+
+MDB = str(db_file_path)
+DRV = 'Microsoft Access Driver (*.mdb, *.accdb)'
+PWD = ''
 
 for table_name in table_names:
     print(table_name)
-    if ((table_name != "words") and (table_name != "wordsMedia") and (table_name != "media") and (table_name != "wordsLabels") and (table_name != "labels")):
+    if (table_name not in columns_to_load_filter):
         continue
     con = pyodbc.connect('DRIVER={};DBQ={};PWD={}'.format(DRV,MDB,PWD))
     cur = con.cursor()
@@ -68,9 +92,9 @@ for table_name in table_names:
 
         row = class_name(**row_dict)
         try:
-            with ArabicWordsDB() as arabic_words_db:
+            with database as db:
                 print(row)
-                arabic_words_db.session.merge(row)
+                db.session.merge(row)
         except Exception as exception:
             print(row)
             print(exception)
