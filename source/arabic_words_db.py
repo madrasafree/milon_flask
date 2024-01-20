@@ -235,10 +235,13 @@ class WordsLabels(Base):
 
 class WordsLists(Base):
     __tablename__ = "wordsLists"
-    __table_args__ = PUBLIC_SCHEMA
-    wordID = Column(TEXT, primary_key=True)
+    #__table_args__ = PUBLIC_SCHEMA
+    wordID = Column(TEXT)
     listID = Column(TEXT)
     pos = Column(TEXT)
+    __table_args__ = (
+        PrimaryKeyConstraint(wordID, listID),
+    )
     
     
 class WordsMedia(Base):

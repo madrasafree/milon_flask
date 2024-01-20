@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from sound_index_function import get_sound_index, get_clean_word
+import time_functions
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import select, func, and_, or_, not_
-from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media
+from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
 from includes_utils import get_top_variables, get_trailer_variables
 from config.config import config
 
@@ -125,6 +126,63 @@ def label_handler():
     return render_template("label.html", label_data_dicts=label_data_dicts, label_name=label_name,
                            word_count=word_count, words=words)
 
+@app.route("/lists.asp")
+def lists_handler():
+    list_id = request.args.get("id", "")
+    
+    query_columns_lists = { Lists }
+    with ArabicWordsDB() as arabic_words_db:
+        list = arabic_words_db.session.query(*query_columns_lists)    \
+            .filter(and_(Lists.ID == list_id)).first()
+
+    print(list.ID)
+    print(list.creator)
+    print(list.listName)
+    print(list.listDesc)
+    print(list.viewCNT)
+    print(list.creationTimeUTC)
+    print(list.lastUpdateUTC)
+    print(list.privacy)
+    print(list.type)
+
+    query_columns_listsUsers = { ListsUsers }
+    with ArabicWordsDB() as arabic_words_db:
+        listsUsers = arabic_words_db.session.query(*query_columns_listsUsers)    \
+            .filter(and_(ListsUsers.list == list_id)).first()
+
+    print(listsUsers.list)
+    print(listsUsers.user)
+    print(listsUsers.pos)
+
+    query_columns_wordsLists = { WordsLists.wordID }
+    with ArabicWordsDB() as arabic_words_db:
+        wordsLists = arabic_words_db.session.query(*query_columns_wordsLists)    \
+            .filter(and_(WordsLists.listID == list_id)).all()
+
+    print(len(wordsLists))
+    for word in wordsLists: print(word)
+
+    privacy_dict={
+        0:["רשימה פרטית","lock"],
+        1:["רשימה לבעלי קישור","lock_open"],
+        2:["רשימה פומבית","public"],
+        3:["רשימה משותפת","group"],
+    }
+
+    list_dict={
+        "privacy_type": privacy_dict[int(list.privacy)][0],
+        "privacy_icon": privacy_dict[int(list.privacy)][1],
+        "lastUpdateUTC_length": len(list.lastUpdateUTC),
+        "str2hebDate_lastUpdateUTC": time_functions.Str2hebDate(list.lastUpdateUTC),
+        "str2hebDate_creationTimeUTC": time_functions.Str2hebDate(list.creationTimeUTC),
+    }
+
+    return render_template("lists.html",
+                            list_id = list_id,
+                            list = list,
+                            listsUsers = listsUsers,
+                            list_dict = list_dict,
+                            wordsLists = wordsLists)
 
 @app.route("/sentences.asp")
 def sentences_handler():
@@ -135,11 +193,18 @@ def sentences_handler():
     with ArabicWordsDB() as arabic_words_db:
         sentences = arabic_words_db.session.query(Sentences).all()
 
-    return render_template("sentences.html", sentence_count=sentence_count, sentences=sentences)
+    return render_template("sentences.html",
+                            sentence_count=sentence_count,
+                            sentences=sentences)
 
 @app.route("/guide.asp")
 def guide_handler():
     return render_template("guide.html")
+
+@app.route("/clock.asp")
+def clock_handler():
+    return render_template("clock.html",
+                            )
 
 @app.route("/word.asp")
 def word_handler():
@@ -156,7 +221,7 @@ def word_handler():
     return render_template("word.html",
                             word_id = word_id,
                             word = word,
-                            label_data_dicts=label_data_dicts)
+                            label_data_dicts = label_data_dicts)
 
 @app.errorhandler(404)
 def page_not_found(e):
