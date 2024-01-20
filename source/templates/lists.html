@@ -5,17 +5,18 @@
 <!DOCTYPE html>
 <html style="height:100%;">
 <head>
+    {% include 'includes/header.html' %}
+    {% from "includes/word_result_macro.html" import word_result %}
     <title>{{ list.listName }} - רשימה אישית</title>
     <meta name="Description" content="רשימת מילים אישית בנושא - {{ list.listName }} | מילון ערבית מדוברת" />
     <meta name="Keywords" content="רשימת מילים, אוסף מילים, ערבית מדוברת, מילים לשיעור, מילים לכיתה, מילים לשיחה" />
-    <meta property="og:url"     content="https://milon.madrasafree.com/lists.asp?id=<%=LID%>" />
+    <meta property="og:url"     content="https://milon.madrasafree.com/lists.asp?id={{ list.ID }}" />
     <meta property="og:type"     content="website" />
     <meta property="og:title"     content="{{ list.listName }} - רשימה אישית" />
     <meta property="og:description"     content="רשימת מילים אישית בנושא - {{ list.listName }} | מילון ערבית מדוברת" />
     <meta property="og:image"           content="https://milon.madrasafree.com/img/lists/{{ list.ID }}.png" />
     <link rel="stylesheet" href="../static/css/edit.css" />
 
-    {% include 'includes/header.html' %}
     <script type = "text/javascript" src="../static/javascript/time.js"></script>
 
     <style>
@@ -118,34 +119,34 @@
     }
 </style>
 {% include 'includes/top.html' %}
-<%
 
+{% set session_userID = 0 %}
+
+{#
     startTime = timer()
     'openDB "arabicWords"
     openDbLogger "arabicWords","O","lists.asp","main",LID
-    
-    if session("userID") then
+    if session_userID then
         dim starred
         starred=false
-        mySQL = "SELECT pos FROM listsUsers WHERE list="&LID&" AND user="&session("userID")
+        mySQL = "SELECT pos FROM listsUsers WHERE list="&LID&" AND user="&session_userID
         res.open mySQL, con
-            if not res.EOF then starred=true
+            if not res.EOF starred=true
         res.close
-    end if
+    endif
 
     mySQL = "SELECT DISTINCT words.id, words.show, words.arabic, words.arabicWord, words.hebrewTranslation, words.hebrewDef, words.pronunciation, words.status, words.imgLink, words.partOfSpeach, words.gender, words.number, wordsLists.listID, wordsMedia.mediaID, wordsLists.pos FROM (words INNER JOIN wordsLists ON words.id = wordsLists.wordID) LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE (((wordsLists.listID)=" & LID & ")" &sqlShow&") ORDER BY "& order
-    res.open mySQL, con %>
-
+    res.open mySQL, con 
+#}
 
 <div class="table">
     <button class="button" onclick="location.href='lists.all.asp'" style="font-size:medium;">רשימות אישיות</button>
-    <span class="star" onclick="location.href='listsToggle.asp?lid=<%=LID%>'"><%
-        if starred then %>
-            <span class="material-icons" title="הסרה ממועדפים">star</span><%
-        else %>
+    <span class="star" onclick="location.href='listsToggle.asp?lid={{ list.ID }}'">
+        {% if starred %}
+            <span class="material-icons" title="הסרה ממועדפים">star</span>
+        {% else %}
             <span class="material-icons" title="הוספה למועדפים">star_border</span>
-        <%
-        end if %>
+        {% endif %}
     </span>
 </div>
 
@@ -189,7 +190,7 @@
             <ul class="ul_inline">
                 <li><span id="wordsSum">...</span></li>
                 <li style="text-align:left;">
-                   <a href="profile.asp?id={{ list.creator }}">{{ listsUsers.user }}</a>
+                   <a href="profile.asp?id={{ list.creator }}">{{ list_dict["listCreatorUsername"] }}</a>
                     
                 </li>
             </ul>
@@ -215,39 +216,47 @@
     <ul class="viewMenu">
         <li>
             <button class="button active">רשימה</button> 
-            <button class="button" onclick="location.href='games.mem.list.asp?lid=<%=LID%>';">קלפי זיכרון</button>
-            <button class="button" onclick="location.href='games.mem.pics.asp?lid=<%=LID%>';">תמונות לחיצות</button>
+            <button class="button" onclick="location.href='games.mem.list.asp?lid={{ list.ID }}';">קלפי זיכרון</button>
+            <button class="button" onclick="location.href='games.mem.pics.asp?lid={{ list.ID }}';">תמונות לחיצות</button>
         </li>
-        <li style="DISPLAY:NONE;"><span class="star<%if starred then%> starOn<%end if%>" title="מועדפים" onclick="location.href='listsToggle.asp?lid=<%=LID%>'">★</span></li>
+        <li style="DISPLAY:NONE;"><span class="star{% if starred %} starOn {% endif %}" title="מועדפים" onclick="location.href='listsToggle.asp?lid={{ list.ID }}'">★</span></li>
     </ul>
 </div>
 
-<div class="table" style="text-align:right; font-weight: 400; font-size:.8em; padding-bottom: 8px;"><%
-    if session("userID") = creatorID then %>
+{% for word in words %}
+<div>
+    {{ word_result(word) }}
+</div>
+{% endfor %}
+
+
+<div class="table" style="text-align:right; font-weight: 400; font-size:.8em; padding-bottom: 8px;">
+
+{% if session_userID == creatorID %}
 
     <div style="padding:10px; background:#ffb6b655; border:0px solid #ffb6b6; margin:10px auto;">
         <h4 style="margin:0 auto 5px auto;">ניהול רשימה</h4>
-        <li class="button" onclick="location.href='listsEdit.asp?id=<%=LID%>'">עריכת רשימה</li><%
-        if session("userID")=1 or session("userID")=73 or session("userID")=76 then%>
+        <li class="button" onclick="location.href='listsEdit.asp?id={{ list.ID }}'">עריכת רשימה</li>
+        
+        {% if session_userID == 1 or session_userID == 73 or session_userID == 76 %}
+
         <div class="newRelDiv" data-ready="no" style="margin-top:5px; font-size:large; text-align:center;">
             <form action="listsWord.insert.asp" method="post" id="newRelForm" name="newRelForm">
                 <input type="hidden" id="wordID" name="wordID" value="" />
-                <input type="hidden" id="listID" name="listID" value="<%=LID%>" />
+                <input type="hidden" id="listID" name="listID" value="{{ list.ID }}" />
                 <label for="items">הוספת מילה לרשימה</label>
                 <br>
                 <input class="newRelInput" name="items" autocomplete="off" placeholder="הקלידו מילה..." />
                 <ul class="newRelSelect">
                 </ul>
             </form>
-        </div><%
-        end if %>
-    </div><%
-
-    end if %>
-
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 
-<%
+{#
 
 Function GetName (Names, Num)
     Dim Arr
@@ -255,7 +264,9 @@ Function GetName (Names, Num)
     GetName = Arr(Num)
 End Function 
 
-if res.EOF then %>
+if res.EOF 
+#}
+{% if false %}
     <style>
         :root {
             --error-bg-color: #ff000036;
@@ -269,96 +280,102 @@ if res.EOF then %>
         }
     </style>
     <div class="table emptyList">טרם נוספו מילים לרשימה זו
-        <br><%
-        if session("userID") = creatorID then %>
-        <br><button><a href="welcome.asp#lists">מדריך שימוש קצר</a></button><%
-        end if %>
-    </div><%
-else
+        <br>
+        {% if session_userID == creatorID %}
+        <br><button><a href="welcome.asp#lists">מדריך שימוש קצר</a></button>
+        {% endif %}
+    </div>
+{% endif %}
+{# else
 
     dim partsOfSpeach,pos,genders,gen,numbers,nums
     partsOfSpeach = "לא ידוע / אחר|שם עצם|שם תואר|פועל|תואר הפועל|מילית יחס|מילית חיבור|מילת קריאה|תחילית|סופית"
     genders = "מגדר נטרלי|זכר|נקבה|לא ידוע / לא רלוונטי"
-    numbers = "בלתי ספיר|יחיד|זוגי|רבים|לא ידוע / לא רלוונטי" %>
+    numbers = "בלתי ספיר|יחיד|זוגי|רבים|לא ידוע / לא רלוונטי" 
+    
+#}
 
-    <div class="table"><%
+    <div class="table">
+{% if flase %}
+        {#
         dim lastID
         lastID = 0
 	    Do until res.EOF
-            if lastID <> res("id") then 
-                if res("show")=false then %>
-                    <div class="listDiv">הערך הבא מוסתר מהגולשים:</div><%
-                else
+            if lastID <> result_id 
+                if result_show == false #}
+                    <div class="listDiv">הערך הבא מוסתר מהגולשים:</div>
+                {# else
 		            countMe = countMe + 1
-                end if %>
-                <div class="result" onclick="location.href='word.asp?id=<%=res("id")%>';">
-                    <div class="heb" style="position:relative;"><a href="word.asp?id=<%=res("id")%>"><%=res("hebrewTranslation")%></a><%
-                    if len(res("hebrewDef"))>0 then %>
-                        <span class="def">(<%=trim(res("hebrewDef"))%>)<%
-                    end if %>
-                        <span class="icons"><%
-                    if len(res("imgLink"))>0 then %>
-                        <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" /><%
-                    end if
-                    if res("mediaID") then %>
-                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/><%
-                    end if
-                    Select Case res("status")
-                    Case 1 %>
-                        <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" /><%
-                    Case -1 %>
-                        <span style="background: #ff2f00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">ערך בבדיקה</span><%
-                    Case Else %>
-                        <span style="background: #ff8d00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">טרם נבדק</span><%
-                    End Select %>
+                endif #}
+                <div class="result" onclick="location.href='word.asp?id={{ result_id }}';">
+                    <div class="heb" style="position:relative;"><a href="word.asp?id={{ result_id }}">{{ result_hebrewTranslation }}</a>
+                        {% if result_hebrewDef|length > 0 %}
+                            <span class="def">({{ trim(result_hebrewDef) }})
+                        {% endif %}
+                        <span class="icons">
+                        {% if result_imgLink|length > 0 %}
+                            <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" />
+                        {% endif %}
+                        {% if result_mediaID %}
+                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/>
+                        {% endif %}
+                        {% if result_status == 1 %}
+                        <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" />
+                        {% elif result_status == -1 %}
+                        <span style="background: #ff2f00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">ערך בבדיקה</span>
+                        {% else %}
+                        <span style="background: #ff8d00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">טרם נבדק</span>
+                        {% endif %}
                     </div>
-                    <div class="arb"><%=res("arabic")%></div>
-                    <div class="arb"><%=res("arabicWord")%></div>
-                    <div class="eng"><%=res("pronunciation")%></div>
-                </div><%
-                if (session("userID")=1 or session("userID")=73) and session("userID")=creatorID then %>
-                <style>
-                    .removeBtn {
-                        bottom:45px;
-                        cursor: pointer;
-                        left:-7px;
-                        opacity:30%;
-                        POSITION:absolute;
-                    }
-                    .removeBtn:hover {
-                        opacity:100%;
-                    }
-                </style>
-                <div class="itemActions" style="margin-bottom:10px; POSITION:relative;">
-                    <span class="material-icons removeBtn" title="הסרה מהרשימה">delete</span>
-                    <form style="DISPLAY:NONE;" class="RUSure" action="listsWord.remove.asp">
-                        להסיר מהרשימה?
-                        <button type="submit" class="RUSureYes">כן</button>
-                        <button type="button" class="RUSureNo">אופס, לא משנה</button>
-                        <input type="hidden" name="wordID" value="<%=res("id")%>"/>
-                        <input type="hidden" name="listID" value="<%=LID%>"/>
-                    </form>
+                    <div class="arb">{{ result_arabic }}</div>
+                    <div class="arb">{{ result_arabicWord }}</div>
+                    <div class="eng">{{ result_pronunciation }}</div>
                 </div>
-                    <%
-                end if %><%
-                lastID = res("id")
-            end if
+                {% if (session_userID == 1 or session_userID == 73) and session_userID == creatorID %}
+                    <style>
+                        .removeBtn {
+                            bottom:45px;
+                            cursor: pointer;
+                            left:-7px;
+                            opacity:30%;
+                            POSITION:absolute;
+                        }
+                        .removeBtn:hover {
+                            opacity:100%;
+                        }
+                    </style>
+                    <div class="itemActions" style="margin-bottom:10px; POSITION:relative;">
+                        <span class="material-icons removeBtn" title="הסרה מהרשימה">delete</span>
+                        <form style="DISPLAY:NONE;" class="RUSure" action="listsWord.remove.asp">
+                            להסיר מהרשימה?
+                            <button type="submit" class="RUSureYes">כן</button>
+                            <button type="button" class="RUSureNo">אופס, לא משנה</button>
+                            <input type="hidden" name="wordID" value="{{ result_id }}"/>
+                            <input type="hidden" name="listID" value="{{ list.ID }}"/>
+                        </form>
+                    </div>
+              {% endif %}
+                {# lastID = result_id #}
+        {#  endif
             res.moveNext
-	    Loop %>
-        </div><%
-end if
-res.close %>
-    <span id="countMe" data-count="<%=countMe%>"></span><%
+	        Loop 
+        #}
+        </div>
+{% endif %}
 
+{# endif
+res.close #}
+    <span id="countMe" data-count="{{ countMe }}"></span>
+{#
     '+1 to viewcount IF not creator or siteAdmin'
     dim viewcount,sessionExist
     sessionExist = false
-    if session("userID") then sessionExist = true
-    if (sessionExist=false OR (sessionExist=true) AND (session("userID")<>creatorID) AND (session("userID")<>1)) then
+    if session_userID sessionExist = true
+    if (sessionExist=false OR (sessionExist=true) AND (session_userID<>creatorID) AND (session_userID<>1)) then
         mySQL = "SELECT * FROM lists WHERE id="&LID
         res.open mySQL, con
-            viewcount = res("viewCNT")
-            if isnull(viewcount) then viewcount=0 
+            viewcount = result_viewCNT
+            if isnull(viewcount) viewcount=0 
             viewcount = viewcount+1
         res.close
 
@@ -367,77 +384,73 @@ res.close %>
         cmd.CommandText=mySQL
         Set cmd.ActiveConnection=con
         cmd.execute ,,128 
-    end if %>
-
-
+    endif 
+#}
     <div id="tagsNew" class="lMenu">
         <ul>
-        <li style="border:2px #afc3d6 dotted; background-color: #e9f2fb;"><a href="listsNew.asp">+ רשימה חדשה</a></li><%
-        if session("userID") then
-            mySQL = "SELECT TOP 7 * FROM lists WHERE creator="&session("userID")&" ORDER BY lastUpdateUTC DESC"
+        <li style="border:2px #afc3d6 dotted; background-color: #e9f2fb;"><a href="listsNew.asp">+ רשימה חדשה</a></li>
+        {# if session_userID
+            mySQL = "SELECT TOP 7 * FROM lists WHERE creator="&session_userID&" ORDER BY lastUpdateUTC DESC"
             res.open mySQL, con
                 Do until res.EOF 
-                    If cint(LID) = res("id") then
-                        LName = res("listName")%>
-                        <li id="current"><%
-                    else %>
-                        <li><%
-                    End if%>
-                        <a href="lists.asp?id=<%=res("id")%>"><%=res("listName")%></a></li><%
-                    res.moveNext
-                Loop
-            res.close
-            response.write "<hr/>"
-            mySQL = "SELECT TOP 7 * FROM lists WHERE creator<>"&session("userID")&" AND privacy > 1 ORDER BY  Rnd(-(100000*ID)*Time())"
-            res.open mySQL, con
-                Do until res.EOF 
-                    If cint(LID) = res("id") then
-                        LName = res("listName")%>
-                        <li id="current"><%
-                    else %>
-                        <li><%
-                    End if%>
-                        <a href="lists.asp?id=<%=res("id")%>"><%=res("listName")%></a></li><%
-                    res.moveNext
-                Loop
-            res.close
-        else
-            mySQL = "SELECT TOP 10 * FROM lists WHERE privacy > 1 ORDER BY Rnd(-(100000*ID)*Time())"
-            res.open mySQL, con
-                Do until res.EOF 
-                    If cint(LID) = res("id") then
-                        LName = res("listName")%>
-                        <li id="current"><%
-                    else %>
-                        <li><%
-                    End if%>
-                        <a href="lists.asp?id=<%=res("id")%>"><%=res("listName")%></a></li><%
-                    res.moveNext
-                Loop
-            res.close 
-        end if %>
+                    If cint(LID) == result_id
+                        LName = result_listName
+        #}
+                        <li id="current">
+        {# else #}
+                        <li>
+        {# endif #}
+                        <a href="lists.asp?id={{ result_id }}">{{ result_listName }}</a></li>
+                        {# res.moveNext
+                            Loop
+                            res.close
+                            response.write "<hr/>"
+                            mySQL = "SELECT TOP 7 * FROM lists WHERE creator<>"&session_userID&" AND privacy > 1 ORDER BY  Rnd(-(100000*ID)*Time())"
+                                res.open mySQL, con
+                            Do until res.EOF 
+                            If cint(LID) == result_id
+                                LName = result_listName
+                        #}
+                        <li id="current">
+                            {# else #}
+                        <li>
+                            {# endif #}
+                        <a href="lists.asp?id={{ result_id }}">{{ result_listName }}</a></li>
+                        {# res.moveNext
+                            Loop
+                        res.close
+                    else
+                        mySQL = "SELECT TOP 10 * FROM lists WHERE privacy > 1 ORDER BY Rnd(-(100000*ID)*Time())"
+                        res.open mySQL, con
+                            Do until res.EOF 
+                                If cint(LID) == result_id
+                                    LName = result_listName
+                        #}
+                        <li id="current">
+                            {# else #}
+                        <li>
+                            {# endif #}
+                        <a href="lists.asp?id={{ result_id }}">{{ result_listName }}</a></li>
+                        {# res.moveNext
+                            Loop
+                        res.close 
+                    endif #}
         </ul>
     </div>
-
-<%
+{#
 endTime = timer()
 durationMs = Int((endTime - startTime)*1000)
 'closeDB
 closeDbLogger "arabicWords","C","lists.asp","main",durationMs,LID+" "+LName
-%>
-
-
-
+#}
 </div>
 
 <script>
     $(function() {
-
         $(".removeBtn").on("click",function(){
             $(this).hide();
             $(this).closest(".itemActions").find(".RUSure").show();
         });
-
         $(".RUSureNo").on("click",function(){
             $(this).parent().hide();
             $(this).closest(".itemActions").find(".removeBtn").show();
@@ -445,14 +458,9 @@ closeDbLogger "arabicWords","C","lists.asp","main",durationMs,LID+" "+LName
     });
 </script>
 
-<script type="text/javascript"><!--
-    //document.title = document.title + " : <%=LName%>";
-//--></script>
+<script type="text/javascript"></script>
 
-
-
-<%
-if session("userID")=1 then %>
+{% if session_userID == 1 %}
 <style>
     #adminTasks {max-width:600px; margin:0 auto;}
     #adminTasks h3 {color:#a94e00; line-height:0em;}
@@ -465,9 +473,7 @@ if session("userID")=1 then %>
         <li>איחוד 3 התצוגות לדף אחד - שינוי תצוגה באמצעות JQUERY</li>
     </ol>
 </div>
-<%
-end if %>
-
+{% endif %}
 
 </body>
 <foot>

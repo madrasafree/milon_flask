@@ -51,13 +51,11 @@ class ArabicUsersDB:
         self.session.close()
         self.engine.dispose()
 
-
 class AllowEdit(Base):
     __tablename__ = "allowEdit"
     __table_args__ = PUBLIC_SCHEMA
     siteName = Column(TEXT, primary_key=True)
     allowed = Column(TEXT)
-
 
 class Log(Base):
     __tablename__ = "log"
@@ -72,22 +70,12 @@ class Log(Base):
     durationMs = Column(TEXT)
     sStr = Column(TEXT)
 
-
 class LoginLog(Base):
     __tablename__ = "loginLog"
     __table_args__ = PUBLIC_SCHEMA
     ID = Column(TEXT, primary_key=True)
     userID = Column(TEXT)
     loginTimeUTC = Column(TEXT)
-
-
-class ListsUsers(Base):
-    __tablename__ = "listsUsers"
-    __table_args__ = PUBLIC_SCHEMA
-    list = Column(TEXT, primary_key=True)
-    user = Column(TEXT)
-    pos = Column(TEXT)
-
 
 class Users(Base):
     __tablename__ = "users"
@@ -100,7 +88,7 @@ class Users(Base):
     name = Column(TEXT)
     eMail = Column(TEXT)
     eMailVerify = Column(TEXT)
-    eMailInterval = Column(TEXT)
+    eMailLast = Column(TEXT)
     eMailInterval = Column(TEXT)
     about = Column(TEXT)
     gender = Column(TEXT)
@@ -120,13 +108,11 @@ class Users(Base):
     credit = Column(TEXT)
     creditLink = Column(TEXT)
 
-
 class UsersWordsFollow(Base):
     __tablename__ = "usersWordsFollow"
     __table_args__ = PUBLIC_SCHEMA
     userID = Column(TEXT, primary_key=True)
     wordID = Column(TEXT)
-
 
 class QueryOptions:
     @staticmethod

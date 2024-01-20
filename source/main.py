@@ -158,8 +158,15 @@ def lists_handler():
         wordsLists = arabic_words_db.session.query(*query_columns_wordsLists)    \
             .filter(and_(WordsLists.listID == list_id)).all()
 
-    #print(len(wordsLists))
-    #for word in wordsLists: print(word)
+    words = []
+    query_columns_words = { Words }
+    for wordID in wordsLists:
+        with ArabicWordsDB() as arabic_words_db:
+            word = arabic_words_db.session.query(*query_columns_words)    \
+                .filter(Words.id == wordID).first()
+        words.append(word)
+
+    print(len(words))
 
     privacy_dict={
         0:["רשימה פרטית","lock"],
@@ -171,6 +178,7 @@ def lists_handler():
     list_dict={
         "privacy_type": privacy_dict[int(list.privacy)][0],
         "privacy_icon": privacy_dict[int(list.privacy)][1],
+        "listCreatorUsername" : user.username,
         "lastUpdateUTC_length": len(list.lastUpdateUTC),
         "str2hebDate_lastUpdateUTC": time_functions.Str2hebDate(list.lastUpdateUTC),
         "str2hebDate_creationTimeUTC": time_functions.Str2hebDate(list.creationTimeUTC),
@@ -179,9 +187,9 @@ def lists_handler():
     return render_template("lists.html",
                             list_id = list_id,
                             list = list,
-                            listsUsers = listsUsers,
                             list_dict = list_dict,
-                            wordsLists = wordsLists)
+                            wordsLists = wordsLists,
+                            words = words)
 
 @app.route("/sentences.asp")
 def sentences_handler():

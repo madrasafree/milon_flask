@@ -4,17 +4,19 @@ import pyodbc
 import os
 import inspect
 import sys
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
 from arabic_words_db import (ArabicWordsDB, History, Labels, Lists,
                                     ListsUsers, Log, Media, Sentences, Words,
                                     WordsLabels, WordsLists, WordsMedia,
                                     WordsRelations, WordsSentences, WordsShort)
 from arabic_users_db import (ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow)
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
+ 
 current_dir =  os.path.abspath(os.path.dirname(__file__))
 parent_dir = os.path.abspath(current_dir + "/../")
+root_dir = os.path.abspath(current_dir + "/../../")
 
 # Constant variable
 table_name_to_class_name_arabicWords = {
@@ -46,22 +48,24 @@ table_names_arabicWords = "history labels lists listsUsers log media sentences w
               "wordsRelations wordsSentences wordsShort".split()
 table_names_arabicUsers = "allowEdit log loginLog users usersWordsFollow".split()
 
-columns_to_load_filter_arabicWords = ["words", "wordsMedia", "media", "wordsLabels", "labels"]
+columns_to_load_filter_arabicWords = ["wordsLists"] #"words", "wordsMedia", "media", "wordsLabels", "labels"]
 columns_to_load_filter_arabicUsers = ["users"]
 
-db_file_path_arabicWords = Path(parent_dir + "\\database\\arabicWords.mdb")
-db_file_path_arabicUsers = Path(parent_dir + "\\database\\arabicUsers.mdb")
+
+db_file_path_arabicWords = Path(root_dir + "\\database\\arabicWords.mdb")
+db_file_path_arabicUsers = Path(root_dir + "\\database\\arabicUsers.mdb")
 
 database_arabicWords = ArabicWordsDB()
 database_arabicUsers = ArabicUsersDB()
 
 # Editable Variables
-table_name_to_class_name = table_name_to_class_name_arabicUsers
-table_names = table_names_arabicUsers
-columns_to_load_filter = columns_to_load_filter_arabicUsers
-db_file_path = db_file_path_arabicUsers
-database = database_arabicUsers
+table_name_to_class_name = table_name_to_class_name_arabicWords
+table_names = table_names_arabicWords
+columns_to_load_filter = columns_to_load_filter_arabicWords
+db_file_path = db_file_path_arabicWords
+database = database_arabicWords
 
+# Generic Import Algorithm
 MDB = str(db_file_path)
 DRV = 'Microsoft Access Driver (*.mdb, *.accdb)'
 PWD = ''
