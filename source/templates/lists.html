@@ -99,8 +99,24 @@
         .audio {max-width:16px ; opacity: 0.5; float: none; position: absolute; top:9px; left: 26px;}
         .erroneous {width:15px;opacity:0.7; position: absolute; top:9px; left:5px;}
 
-        @media (max-width: 600px) {
+        @media (max-width:610px) {
+            hr {margin:10px auto; }
             .eng,.heb {float:none;}
+            .box_workaround {max-width:500px; margin:0 2%;}
+        }
+
+        @media (min-width:610px) {
+            .box_workaround {max-width:500px; margin:0 auto;}
+            .exact .result {
+                font-size: 2em;
+                }
+            .exact mark {
+                min-width:130px;
+                }
+            hr {margin:30px auto; }
+        }
+                .eng, .heb {
+                float: none;
         }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -201,7 +217,7 @@
 <table class="table" style="font-size:0.8em; color:#ababab;">
     <tr>
         <td>
-            {% if list_dict["lastUpdateUTC_length"] > 0 %}
+            {% if list_dict["str2hebDate_lastUpdateUTC"] != "" %}
                     עריכה אחרונה - {{ list_dict["str2hebDate_lastUpdateUTC"] }}
             {% endif %}
         </td>
@@ -223,12 +239,14 @@
     </ul>
 </div>
 
-{% for word in words %}
-<div>
-    {{ word_result(word) }}
-</div>
-{% endfor %}
 
+<div class="box_workaround">
+    {% for word in words %}
+    <div>
+        {{ word_result(word) }}
+    </div>
+    {% endfor %}
+</div>
 
 <div class="table" style="text-align:right; font-weight: 400; font-size:.8em; padding-bottom: 8px;">
 
@@ -366,83 +384,21 @@ if res.EOF
 {# endif
 res.close #}
     <span id="countMe" data-count="{{ countMe }}"></span>
-{#
-    '+1 to viewcount IF not creator or siteAdmin'
-    dim viewcount,sessionExist
-    sessionExist = false
-    if session_userID sessionExist = true
-    if (sessionExist=false OR (sessionExist=true) AND (session_userID<>creatorID) AND (session_userID<>1)) then
-        mySQL = "SELECT * FROM lists WHERE id="&LID
-        res.open mySQL, con
-            viewcount = result_viewCNT
-            if isnull(viewcount) viewcount=0 
-            viewcount = viewcount+1
-        res.close
 
-        mySQL = "UPDATE lists SET viewCNT="& viewcount &" WHERE id="&LID
-        cmd.CommandType=1
-        cmd.CommandText=mySQL
-        Set cmd.ActiveConnection=con
-        cmd.execute ,,128 
-    endif 
-#}
     <div id="tagsNew" class="lMenu">
         <ul>
-        <li style="border:2px #afc3d6 dotted; background-color: #e9f2fb;"><a href="listsNew.asp">+ רשימה חדשה</a></li>
-        {# if session_userID
-            mySQL = "SELECT TOP 7 * FROM lists WHERE creator="&session_userID&" ORDER BY lastUpdateUTC DESC"
-            res.open mySQL, con
-                Do until res.EOF 
-                    If cint(LID) == result_id
-                        LName = result_listName
-        #}
-                        <li id="current">
-        {# else #}
-                        <li>
-        {# endif #}
-                        <a href="lists.asp?id={{ result_id }}">{{ result_listName }}</a></li>
-                        {# res.moveNext
-                            Loop
-                            res.close
-                            response.write "<hr/>"
-                            mySQL = "SELECT TOP 7 * FROM lists WHERE creator<>"&session_userID&" AND privacy > 1 ORDER BY  Rnd(-(100000*ID)*Time())"
-                                res.open mySQL, con
-                            Do until res.EOF 
-                            If cint(LID) == result_id
-                                LName = result_listName
-                        #}
-                        <li id="current">
-                            {# else #}
-                        <li>
-                            {# endif #}
-                        <a href="lists.asp?id={{ result_id }}">{{ result_listName }}</a></li>
-                        {# res.moveNext
-                            Loop
-                        res.close
-                    else
-                        mySQL = "SELECT TOP 10 * FROM lists WHERE privacy > 1 ORDER BY Rnd(-(100000*ID)*Time())"
-                        res.open mySQL, con
-                            Do until res.EOF 
-                                If cint(LID) == result_id
-                                    LName = result_listName
-                        #}
-                        <li id="current">
-                            {# else #}
-                        <li>
-                            {# endif #}
-                        <a href="lists.asp?id={{ result_id }}">{{ result_listName }}</a></li>
-                        {# res.moveNext
-                            Loop
-                        res.close 
-                    endif #}
+            <li style="border:2px #afc3d6 dotted; background-color: #e9f2fb;"><a href="listsNew.asp">+ רשימה חדשה</a></li>
+            <br>
+            {# if session_userID #}
+
+            {% for list in moreLists %}
+                {% if list.id != list_id %}
+                    <li><a href="lists.asp?id={{ list.ID }}">{{ list.listName }}</a></li>
+                    <br>
+                {% endif %}
+            {% endfor %}
         </ul>
     </div>
-{#
-endTime = timer()
-durationMs = Int((endTime - startTime)*1000)
-'closeDB
-closeDbLogger "arabicWords","C","lists.asp","main",durationMs,LID+" "+LName
-#}
 </div>
 
 <script>

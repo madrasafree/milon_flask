@@ -54,6 +54,9 @@ def AR2UTC(date):
 
 # prints STRING as Hebrew Date
 def Str2hebDate(strDate):
+    print(strDate)
+    if (strDate == "" or strDate == "None"):
+        return ""
     day = strDate[8:10] + " ל"
     month = strDate[5:7]
     if month == "01":
@@ -80,6 +83,8 @@ def Str2hebDate(strDate):
         monthStr = "נובמבר"
     elif month == "12":
         monthStr = "דצמבר"
+    else:
+        monthStr = month
     year = (" " + strDate[:4])
     return day + monthStr + year
 

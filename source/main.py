@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from sound_index_function import get_sound_index, get_clean_word
 import time_functions
+import datetime
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import select, func, and_, or_, not_
 from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
@@ -127,37 +128,40 @@ def label_handler():
     return render_template("label.html", label_data_dicts=label_data_dicts, label_name=label_name,
                            word_count=word_count, words=words)
 
+@app.route("/lists.all.asp")
+def lists_all_handler():
+    return render_template("lists.all.html")
+
 @app.route("/lists.asp")
 def lists_handler():
     list_id = request.args.get("id", "")
-    
+    is_search_submitted = (list_id != "")
+
+    # Pull List
     query_columns_lists = { Lists }
     with ArabicWordsDB() as arabic_words_db:
         list = arabic_words_db.session.query(*query_columns_lists)    \
             .filter(and_(Lists.ID == list_id)).first()
+    is_list_found = (list is not None)
 
-    print(list.ID)
-    print(list.creator)
-    print(list.listName)
-    print(list.listDesc)
-    print(list.viewCNT)
-    print(list.creationTimeUTC)
-    print(list.lastUpdateUTC)
-    print(list.privacy)
-    print(list.type)
+    if not is_search_submitted or not is_list_found:
+        return render_template("lists.all.html",
+                                is_search_submitted = is_search_submitted,
+                                is_list_found = is_list_found)
 
+    # Pull List's Creator
     query_columns_users = { Users }
     with ArabicUsersDB() as arabic_users_db:
         user = arabic_users_db.session.query(*query_columns_users)    \
             .filter(and_(Users.id == list.creator)).first()
 
-    print(user.username)
-
+    # Pull WordsIDs from List
     query_columns_wordsLists = { WordsLists.wordID }
     with ArabicWordsDB() as arabic_words_db:
         wordsLists = arabic_words_db.session.query(*query_columns_wordsLists)    \
             .filter(and_(WordsLists.listID == list_id)).all()
 
+    # Pull Words from List
     words = []
     query_columns_words = { Words }
     for wordID in wordsLists:
@@ -166,7 +170,13 @@ def lists_handler():
                 .filter(Words.id == wordID).first()
         words.append(word)
 
-    print(len(words))
+    # Pull 7 most-recently-updated public lists from same creator
+    with ArabicWordsDB() as arabic_words_db:
+        moreLists = arabic_words_db.session.query(*query_columns_lists)    \
+            .filter(and_(Lists.creator == list.creator)).all()
+    moreLists = [list for list in moreLists if int(list.privacy) > 1]
+    moreLists.sort(key=lambda x: datetime.datetime.strptime(x.lastUpdateUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
+    if (len(moreLists) > 10): moreLists = moreLists[:10]
 
     privacy_dict={
         0:["רשימה פרטית","lock"],
@@ -179,17 +189,19 @@ def lists_handler():
         "privacy_type": privacy_dict[int(list.privacy)][0],
         "privacy_icon": privacy_dict[int(list.privacy)][1],
         "listCreatorUsername" : user.username,
-        "lastUpdateUTC_length": len(list.lastUpdateUTC),
         "str2hebDate_lastUpdateUTC": time_functions.Str2hebDate(list.lastUpdateUTC),
         "str2hebDate_creationTimeUTC": time_functions.Str2hebDate(list.creationTimeUTC),
     }
 
     return render_template("lists.html",
+                            is_search_submitted = is_search_submitted,
+                            is_list_found = is_list_found,
                             list_id = list_id,
                             list = list,
                             list_dict = list_dict,
                             wordsLists = wordsLists,
-                            words = words)
+                            words = words,
+                            moreLists = moreLists)
 
 @app.route("/sentences.asp")
 def sentences_handler():
@@ -255,7 +267,6 @@ def games_mem_handler():
 
 @app.route("/")
 def root_handler():
-
     # INITIALIZE VARIABLES
     is_search_submitted = True
     is_search_string_valid = True
