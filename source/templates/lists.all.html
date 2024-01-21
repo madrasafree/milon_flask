@@ -1,20 +1,11 @@
-<!--#include file="inc/inc.asp"--><%
-dim countMe, nikud, order
-order = "pos"
-Select case Left(Request("order")&"p",1)
-    Case "a": order = "arabicWord"
-    Case "e": order = "pronunciation"
-    Case "h": order = "hebrewTranslation"
-End select
-countMe = 0
-nikud = "" %>
+<!--#include file="inc/inc.asp"-->
 
 <!DOCTYPE html>
 <html style="height:100%;">
 <head>
+    {% include 'includes/header.html' %}
     <title>הרשימות שלכם</title>
 	<meta name="Description" content="רשימות מילים" />
-    <!--#include file="inc/header.asp"-->
     <style>
         h2 {margin: 0 4px 4px 0; font-size:1.2em; letter-spacing:0.1em; font-weight:100;}
         button {margin:4px; min-width:50px; border-radius:20px; border:0px; background:#bad7f3; color:#3e3e3e; padding:4px 10px; box-shadow:#00000047 1px 1px;}
@@ -44,17 +35,23 @@ nikud = "" %>
                 $(this).parents(".lists").find(".hidden").slideToggle();
                 return false;
             });
+            $("#message").hide();
+
+            if ('{{ is_search_submitted }}' =="True")
+            {
+                if ('{{ is_list_found }}' == "False")
+                {
+                    $("#message").show();
+                    $("#message").append("לא נמצאה רשימה עם המספר הסידורי המבוקש");
+                }
+            }
+
         });
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 </head>
 <body>
-<!--#include file="inc/time.asp"-->
-<!--#include file="inc/top.asp"--><%
-startTime = timer()
-'openDB "arabicWords"
-openDbLogger "arabicWords","O","lists.all.asp","multi. Break down","" %>
-
+    {% include 'includes/top.html' %}
 
 <div id="pTitle">
     הרשימות שלכם
@@ -63,155 +60,146 @@ openDbLogger "arabicWords","O","lists.all.asp","multi. Break down","" %>
 <div class="listsWrapper">
     <div>
         <div class="lists listsMine">
-        <h2>רשימות שיצרתי</h2><%
+        <h2>רשימות שיצרתי</h2>
+        {% if (session_userID) %}
+        {#
         if session("userID") then
             mySQL = "SELECT * FROM lists WHERE creator="&session("userID")&" ORDER BY listName"
             res.open mySQL, con
             if res.EOF then %>
                 <div>עוד לא יצרת אף רשימה.
-                <br/>מעניין מה הכפתור הזה פה למטה עושה</div><%
+                <br/>מעניין מה הכפתור הזה פה למטה עושה</div>
+            
             else
                 i=0
-                do until res.EOF %>
+                do until res.EOF #}
                     <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("id")%>';">
                         <span class="listName"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
-                        <span class="material-icons" style="float:left;"><%
+                        <span class="material-icons" style="float:left;">
+                            {#
                             select case res("privacy")
-                             case 0 %>lock<%
-                             case 1 %>lock_open<%
-                             case 2 %>public<%
-                             case 3 %>group<%
-                             end select %>
+                             case 0 lock
+                             case 1 lock_open
+                             case 2 public
+                             case 3 group
+                             end select #}
                         </span>
-                    </div><%
+                    </div>
+                    {#
                     res.moveNext
                     i = i+1
                 loop 
-                if i>5 then %>
-                    <button class="showMore listsMine" style="background:#84d45c66;">⇵</button><%
-                end if
-            end if %>
-            <button class="listsMine" style="background:#84d45c66;" onclick="location.href='listsNew.asp';">רשימה חדשה</button><%
-            res.close 
-        else %>
+                if i>5 then #}
+                    <button class="showMore listsMine" style="background:#84d45c66;">⇵</button>
+                {# endif
+            endif #}
+            <button class="listsMine" style="background:#84d45c66;" onclick="location.href='listsNew.asp';">רשימה חדשה</button>
+            {# res.close #} 
+        {% else %}
             <a style="display:block;" href="login.asp?returnTo=lists.all.asp">לחצו כאן כדי להתחבר</a>
-            <%
-        end if%>
+        {% endif %}
         </div>
 
         <div class="lists listsSaved">
-        <h2>המועדפים שלי</h2><%
+        <h2>המועדפים שלי</h2>
+        {% if (session_userID) %}
+        {#
         if session("userID") then
             mySQL = "SELECT * FROM lists INNER JOIN listsUsers ON lists.ID=listsUsers.list WHERE user="&session("userID")&" ORDER BY pos"
             res.open mySQL, con
-            if res.EOF then %>
-                <div>עוד לא שמרת אף רשימה</div><%
+            if res.EOF then #}
+                <div>עוד לא שמרת אף רשימה</div>
+                {#
             else
                 i=0
-                do until res.EOF %>
+                do until res.EOF #}
                     <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("id")%>';">
                         <span class="listName"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
-                        <span class="material-icons" style="float:left;"><%
+                        <span class="material-icons" style="float:left;">
+                            {#
                             select case res("privacy")
-                             case 0 %>lock<%
-                             case 1 %>lock_open<%
-                             case 2 %>public<%
-                             case 3 %>group<%
-                             end select %>
+                             case 0 lock
+                             case 1 lock_open
+                             case 2 public
+                             case 3 group
+                             end select #}
                         </span>
-                    </div><%
+                    </div>
+                    {#
                     res.moveNext
                     i = i+1
                 loop
-                if i>5 then %>
-                    <button class="showMore listsSaved" style="background:#84d45c66;">⇵</button><%
+                if i>5 then #}
+                    <button class="showMore listsSaved" style="background:#84d45c66;">⇵</button>
+                    {#
                 end if
             end if
-            res.close 
-        else %>
+            res.close #} 
+        {% else %}
             <a style="display:block;" href="login.asp?returnTo=lists.all.asp">לחצו כאן כדי להתחבר</a>
-            <%
-        end if%>
+        {% endif %}
         </div>
     </div>
     <div>
         <div class="lists listsNew">
-            <h2>הכי חדשות</h2><%
-            i=0
-            mySQL = "SELECT TOP 10 * FROM lists WHERE privacy > 1 ORDER BY id DESC"
-            res.open mySQL, con
-            do until res.EOF %>
-                <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("id")%>';">
-                    <span class="listName" title="<%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%>"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
-                    <span class="listData"><%=left(res("creationTimeUTC"),10)%>
-                        <span class="material-icons" style="float:left;"><%
-                            select case res("privacy")
-                             case 0 %>lock<%
-                             case 1 %>lock_open<%
-                             case 2 %>public<%
-                             case 3 %>group<%
-                             end select %>
+            <h2>הכי חדשות</h2>
+            {% for list in lists_all_dict["lists_top_new"] %}
+                <div {% if loop.index > 5 %} class="hidden" {% endif %} onclick="location.href='lists.asp?id={{ list.ID }}';">
+                    <span class="listName" title="{{ list.listName }}">{{ list.listName }}</span>
+                    <span class="listData"> {{ list.creationTimeUTC }}
+                        <span class="material-icons" style="float:left;">
+                            {% if list.privacy == "0" %}    lock
+                            {% elif list.privacy == "1" %}  lock_open
+                            {% elif list.privacy == "2" %}  public
+                            {% elif list.privacy == "3" %}  group
+                            {% endif %}
                         </span>
                     </span>
-                </div><%
-                res.moveNext
-                i=i+1
-            loop
-            if i>5 then %>
-            <button class="showMore listsNew" style="background:#fb936a66;">⇵</button><%
-            end if
-        res.close %>
+                </div>
+            {% endfor %}
+            <button class="showMore listsNew" style="background:#fb936a66;">⇵</button>
         </div>
 
         <div class="lists listsPop">
-            <h2>הכי נצפות</h2><%
-            i=0
-            mySQL = "SELECT TOP 10 * FROM lists WHERE privacy > 1 ORDER BY viewCNT DESC"
-            res.open mySQL, con
-            do until res.EOF %>
-                <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("id")%>';">
-                    <span class="listName" title="<%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%>"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
-                    <span class="listData" title="מספר צפיות"><%=formatNumber(res("viewCNT"),0)%>
-                        <span class="material-icons" style="float:left;"><%
-                            select case res("privacy")
-                             case 0 %>lock<%
-                             case 1 %>lock_open<%
-                             case 2 %>public<%
-                             case 3 %>group<%
-                             end select %>
+            <h2>הכי נצפות</h2>
+            {% for list in lists_all_dict["lists_top_view"] %}
+                <div {% if loop.index > 5 %} class="hidden" {% endif %} onclick="location.href='lists.asp?id={{ list.ID }}';">
+                    <span class="listName" title="{{ list.listName }}">{{ list.listName }}</span>
+                    <span class="listData" title="מספר צפיות">{{ list.viewCNT }}
+                        <span class="material-icons" style="float:left;">
+                            {% if list.privacy == "0" %}    lock
+                            {% elif list.privacy == "1" %}  lock_open
+                            {% elif list.privacy == "2" %}  public
+                            {% elif list.privacy == "3" %}  group
+                            {% endif %}
                         </span>
                     </span>
-                </div><%
-                res.moveNext
-                i=i+1
-            loop
-            if i>5 then %>
-            <button class="showMore listsPop" style="background:#fb936a66;">⇵</button><%
-            end if
-            res.close %>
+                </div>
+            {% endfor %}
+            <button class="showMore listsPop" style="background:#fb936a66;">⇵</button>
         </div>
 
-    <%
-if session("userID")=1 or session("userID")=73 then 
+{% if (session_userID == 1 or session_userID == 73) and session_userID == creatorID %}
+
 dim i
 mySQL = "SELECT count(id) FROM lists"
-res.open mySQL, con %>
-
+res.open mySQL, con 
+#}
 <h3>אינדקס רשימות אישיות</h3>
 <div style="max-width:600px; margin:0 auto; text-align:center;">
     <p>ישנן כרגע <%=res(0)%> רשימות</p>
-</div><%
-res.close %>
+</div>
 
 <div class="table" style="text-align:center; padding:10px 0px;">
     <input id="searchList" />
     <div id="listSelect">
     </div>
-</div><%
-end if %>
+</div>
+{# endif #}
 
+{% endif %}
 
-        <%
+{#
     dim firstLtr
     firstLtr=""
     i=0
@@ -221,26 +209,30 @@ end if %>
         if ucase(left(trim(res("listName")),1)) <> ucase(firstLtr) then 
             if firstLtr<>"" then
                 if i>5 then %>
-                    <button class="showMore">⇵</button><%
-                end if %>
-                </div><%
-            end if %>
-            <div class="lists"><h2><%=left(trim(res("listName")),1)%></h2><%
-            i=0
-        end if %>
+#}
+                    <button class="showMore">⇵</button>
+                    {# endif #}
+                </div>
+                {# endif #}
+            <div class="lists"><h2><%=left(trim(res("listName")),1)%></h2>
+            {# i=0 #}
+        {# endif #}
         <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("lists.ID")%>'">
             <span class="listName" title="<%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%>"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
             <span class="listData"><%=res("userName")%>
-                <span class="material-icons" style="float:left;"><%
+                <span class="material-icons" style="float:left;">
+                    {#
                     select case res("privacy")
                         case 0 %>lock<%
                         case 1 %>lock_open<%
                         case 2 %>public<%
                         case 3 %>group<%
                         end select %>
+                    #}
                 </span>
             </span>
-        </div><%
+        </div>
+{#
         i = i + 1
         firstLtr = left(trim(res("listName")),1)
         res.moveNext
@@ -250,7 +242,7 @@ endTime = timer()
 durationMs = Int((endTime - startTime)*1000)
 'closeDB
 closeDbLogger "arabicWords","C","lists.all.asp","single",durationMs,""
-%>
+#}
 </div>
 </div>
 
@@ -283,4 +275,8 @@ closeDbLogger "arabicWords","C","lists.all.asp","single",durationMs,""
     });
 </script>
 
-<!--#include file="inc/trailer.asp"-->
+</body>
+<foot>
+    {% include 'includes/trailer.html' %}
+</foot>
+</html>

@@ -326,6 +326,11 @@ menu li:first-child p, menu li:last-child p{
         <span style="position:absolute; top:10px; left:0;" onclick="toggleMenu();"><a href="#">x</a></span>
     </div>
 
+    {% if msg != "" %}
+      <div id="message">
+        {{ msg }}
+      </div>
+    {% endif %}
     <br />
 
     <script>

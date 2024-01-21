@@ -128,9 +128,37 @@ def label_handler():
     return render_template("label.html", label_data_dicts=label_data_dicts, label_name=label_name,
                            word_count=word_count, words=words)
 
+
 @app.route("/lists.all.asp")
 def lists_all_handler():
-    return render_template("lists.all.html")
+    list_id = request.args.get("id", "")
+    is_search_submitted = (list_id != "")
+    is_list_found = (not is_search_submitted)
+    
+    # Pull Lists
+    query_columns_lists = { Lists }
+    with ArabicWordsDB() as arabic_words_db:
+        lists_all = arabic_words_db.session.query(*query_columns_lists)    \
+            .filter().all()
+    lists_all = [list for list in lists_all if int(list.privacy) > 1]
+
+    lists_top_new = lists_all
+    lists_top_new.sort(key=lambda x: datetime.datetime.strptime(x.creationTimeUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
+    if (len(lists_top_new) > 10): lists_top_new = lists_top_new[:10]
+    for list in lists_top_new:
+        list.creationTimeUTC = str(datetime.datetime.fromisoformat(list.creationTimeUTC[:-1])).split()[0]
+
+    lists_top_view = lists_all
+    lists_top_view.sort(key=lambda x: int(x.viewCNT), reverse=True)
+    if (len(lists_top_view) > 10): lists_top_view = lists_top_view[:10]
+
+    lists_all_dict = {"lists_top_new": lists_top_new,
+                    "lists_top_view": lists_top_view}
+
+    return render_template("lists.all.html",
+                                is_search_submitted = is_search_submitted,
+                                is_list_found = is_list_found,
+                                lists_all_dict = lists_all_dict)
 
 @app.route("/lists.asp")
 def lists_handler():
@@ -141,25 +169,23 @@ def lists_handler():
     query_columns_lists = { Lists }
     with ArabicWordsDB() as arabic_words_db:
         list = arabic_words_db.session.query(*query_columns_lists)    \
-            .filter(and_(Lists.ID == list_id)).first()
+            .filter(Lists.ID == list_id).first()
     is_list_found = (list is not None)
 
-    if not is_search_submitted or not is_list_found:
-        return render_template("lists.all.html",
-                                is_search_submitted = is_search_submitted,
-                                is_list_found = is_list_found)
+    if (not is_search_submitted) or (is_search_submitted and not is_list_found):
+        return redirect(f"lists.all.asp?id={list_id}", code=302)
 
     # Pull List's Creator
     query_columns_users = { Users }
     with ArabicUsersDB() as arabic_users_db:
         user = arabic_users_db.session.query(*query_columns_users)    \
-            .filter(and_(Users.id == list.creator)).first()
+            .filter(Users.id == list.creator).first()
 
     # Pull WordsIDs from List
     query_columns_wordsLists = { WordsLists.wordID }
     with ArabicWordsDB() as arabic_words_db:
         wordsLists = arabic_words_db.session.query(*query_columns_wordsLists)    \
-            .filter(and_(WordsLists.listID == list_id)).all()
+            .filter(WordsLists.listID == list_id).all()
 
     # Pull Words from List
     words = []
@@ -173,7 +199,7 @@ def lists_handler():
     # Pull 7 most-recently-updated public lists from same creator
     with ArabicWordsDB() as arabic_words_db:
         moreLists = arabic_words_db.session.query(*query_columns_lists)    \
-            .filter(and_(Lists.creator == list.creator)).all()
+            .filter(Lists.creator == list.creator).all()
     moreLists = [list for list in moreLists if int(list.privacy) > 1]
     moreLists.sort(key=lambda x: datetime.datetime.strptime(x.lastUpdateUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
     if (len(moreLists) > 10): moreLists = moreLists[:10]

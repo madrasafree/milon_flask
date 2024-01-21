@@ -17,7 +17,7 @@ To compile the repository locally in DEV mode one must:
 		Object -> Create -> Server:
 		Server Name (madrasa_flask), Host Address (127.0.0.1), Port (5432), Username (postgres), Maintenance database (postgres).
 	c. Create new empty tables:
-		Tools -> Query Tool -> paste and run the Query from repository under /milon_flask/research/create_tables.sql
+		In Browser, find madrasa_flask/Databases/postgres/Schemas -> Right Click -> Query Tool -> paste and run the Query from repository under /milon_flask/research/create_tables.sql
 	d. Confirm you find the tables:
 		Browser -> "madrasa_flask" -> Databases -> postgres -> Schemas -> pubic -> Tables
 7. Edit source/arabic_words_db.py with Host Address, Port, Username, Maintenance database.
@@ -26,9 +26,9 @@ To compile the repository locally in DEV mode one must:
 10. Install "Microsoft Access Database Engine":
 	https://www.microsoft.com/en-us/download/details.aspx?id=54920
 11. Load PostgreSQL with Dictionary DataBase file .mdb by running:
-	a. copy research/import_db_from_windows.py to source folder
+	a. Edit source/scripts/import_db_from_windows.py to load the relevant table under "# Editable Variables" section.
 	b. cd source
-	c. python -m import_db_from_windows
+	c. python scripts/import_db_from_windows.py
 12. Start-up the dictionary locally by running:
 	a. cd source
 	b. python -m main

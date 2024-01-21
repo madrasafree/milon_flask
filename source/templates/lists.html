@@ -122,7 +122,12 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="team/js/jquery.list.update.js"></script> <!-- THIS HAS THE JSON CODE-->
     <script>
+        
         $(document).ready(function(){
+            // HIDES / UNHIDES
+            $(".hidden").hide();
+            $("#message").hide();
+
             var cnt = "{{ wordsLists|length }}";
             if (cnt > 1) $("#wordsSum").html(cnt + " מילים");
         });
