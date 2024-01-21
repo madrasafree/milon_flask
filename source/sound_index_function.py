@@ -1,5 +1,9 @@
 import re
 
+def get_clean_word(word):
+    cleaned_word = re.sub(r"[^א-ת'ؠ-يٱ-ٳٶ-ە]", "", word)
+    return cleaned_word
+
 def get_sound_index(word):
 
     sound_index = ""

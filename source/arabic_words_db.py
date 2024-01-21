@@ -1,6 +1,10 @@
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 import json
+from config.config import config
 
-from sqlalchemy import Column, create_engine, inspect
+from sqlalchemy import Column, create_engine, inspect, UniqueConstraint, ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import TEXT, TIMESTAMP, BOOLEAN, INTEGER
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -17,16 +21,17 @@ Base = declarative_base()
 PUBLIC_SCHEMA = {"schema": "public"}
 
 
-#
-# host = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"
-
+# DEVELOPMENT SERVER CONFIGURATION:
+load_dotenv()
 user_name = "postgres"
-password = "1234"
-
-host = "localhost"
-
-db_connection_string = f"postgresql://{user_name}:{password}@{host}:5432/arabic_words_db"
-
+password = config["DEV"].API_TOKEN   # TODO: ADD PASSWORD TO ENVIRONMENT VARIABLE UNDER "MADRASA_SERVER_KEY_SECRET_DEV"
+# host_address = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
+# host_address = "localhost"                                                        # LOCAL DEVELOPMENT
+host_address = "127.0.0.1"                                                          # LOCAL DEVELOPMENT
+port = "5432"
+#mdb = "arabic_words_db"
+maintenance_database = "postgres"
+db_connection_string = f"postgresql://{user_name}:{password}@{host_address}:{port}/{maintenance_database}"
 
 class ArabicWordsDB:
     def __init__(self):
@@ -163,7 +168,6 @@ class Media(Base):
     lastUpdateUTC = Column(TEXT)
 
 
-
 class Sentences(Base):
     __tablename__ = "sentences"
     __table_args__ = PUBLIC_SCHEMA
@@ -218,21 +222,28 @@ class Words(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
 class WordsLabels(Base):
     __tablename__ = "wordsLabels"
-    __table_args__ = PUBLIC_SCHEMA
-    wordID = Column(TEXT, primary_key=True)
+    #__table_args__ = PUBLIC_SCHEMA
+    wordID = Column(TEXT)
     labelID = Column(TEXT)
+    __table_args__ = (
+        PrimaryKeyConstraint(wordID, labelID),
+    )
 
 
 class WordsLists(Base):
     __tablename__ = "wordsLists"
-    __table_args__ = PUBLIC_SCHEMA
-    wordID = Column(TEXT, primary_key=True)
+    #__table_args__ = PUBLIC_SCHEMA
+    wordID = Column(TEXT)
     listID = Column(TEXT)
     pos = Column(TEXT)
-
-
+    __table_args__ = (
+        PrimaryKeyConstraint(wordID, listID),
+    )
+    
+    
 class WordsMedia(Base):
     __tablename__ = "wordsMedia"
     __table_args__ = PUBLIC_SCHEMA

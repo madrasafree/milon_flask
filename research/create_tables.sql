@@ -1,3 +1,11 @@
+-- This SQL script should be manually loaded to the DEV Local Server via pgAdmin 4 
+-- This must be performed before one can load the data via milon_flask/source/scripts/import_db_from_windows.py
+
+
+--------------------------
+--- ArabicWords TABLES ---
+--------------------------
+
 create table if not exists "history"
 (
 	"ID"  text,
@@ -194,5 +202,73 @@ create table if not exists "wordsShort"
 (
 	"ID"  text,
 	"sStr"  text,
+	"wordID"  text
+);
+
+--------------------------
+--- ArabicUsers TABLES ---
+--------------------------
+
+create table if not exists "allowEdit"
+(
+	"siteName"  text,
+	"allowed"  text
+);
+
+create table if not exists "log"
+(
+	"ID"  text,
+	"opType"  text,
+	"afDB"  text,
+	"afPage"  text,
+	"opNum"  text,
+	"userIP"  text,
+	"opTimestamp"  text,
+	"durationMs"  text,
+	"sStr"  text
+);
+
+create table if not exists "loginLog"
+(
+	"ID"  text,
+	"userID"  text,
+	"loginTimeUTC"  text
+);
+
+create table if not exists "users"
+(
+	"list"  text,
+    "id"  text,
+    "userStatus"  text,
+    "username"  text,
+    "password"  text,
+    "role"  text,
+    "name"  text,
+    "eMail"  text,
+    "eMailVerify"  text,
+    "eMailLast"  text,
+    "eMailInterval"  text,
+    "about"  text,
+    "gender"  text,
+    "picture"  text,
+    "joinDateUTC"  text,
+    "maxLists"  text,
+    "addWords"  text,
+    "editorWords"  text,
+    "editorPics"  text,
+    "editorMedia"  text,
+    "speaker"  text,
+    "coder"  text,
+    "arabicLevel"  text,
+    "hebrewLevel"  text,
+    "arabicDialect"  text,
+    "arabicCity"  text,
+    "credit"  text,
+    "creditLink"  text
+);
+
+create table if not exists "usersWordsFollow"
+(
+	"userID"  text,
 	"wordID"  text
 );

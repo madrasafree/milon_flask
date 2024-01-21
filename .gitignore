@@ -1,1 +1,9 @@
+# GIT IGNORE #
+###################
 .idea/*
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+
+research/debug.py
+.vscode/

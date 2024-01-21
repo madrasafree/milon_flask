@@ -242,9 +242,7 @@ menu li:first-child p, menu li:last-child p{
 </style>
 
 <div id="siteTitle">
-<a href=".">
-  מילון ערבית מדוברת
-  </a>
+<a href=".">מילון ערבית מדוברת</a>
 </div>
 <form id="bar-search-container" action="." autocomplete="off" onsumbit="loadAnim(e)">
   <div dir="rtl" id="bar">
@@ -254,11 +252,11 @@ menu li:first-child p, menu li:last-child p{
       </div>
       <div id="bar-search">
         <label for="searchBoxTop" style="DISPLAY:NONE;"> </label>
-        <input id="searchBoxTop" name="searchString" type="search" value="" />
+        <input id="searchBoxTop" name="searchString" type="search" value='{{ search_string }}' />
       </div>
       <div id="bar-logo">
         <a href=".">
-          <img style="width:100%;" src="static/images/milon-logo.png" alt="logo" />
+          <img style="width:100%;" src="static/images/site/milon-logo.png" alt="logo" />
         </a>
       </div>
     </div>
@@ -328,6 +326,11 @@ menu li:first-child p, menu li:last-child p{
         <span style="position:absolute; top:10px; left:0;" onclick="toggleMenu();"><a href="#">x</a></span>
     </div>
 
+    {% if msg != "" %}
+      <div id="message">
+        {{ msg }}
+      </div>
+    {% endif %}
     <br />
 
     <script>

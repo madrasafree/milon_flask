@@ -1,0 +1,443 @@
+<!--#include file="inc/inc.asp"-->
+<!--#include file="inc/functions/functions.asp"-->
+<!--#include file="inc/time.asp"-->
+
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+    {% include 'includes/header.html' %}
+    {% from "includes/word_result_macro.html" import word_result %}
+    <title>{{ list.listName }} - רשימה אישית</title>
+    <meta name="Description" content="רשימת מילים אישית בנושא - {{ list.listName }} | מילון ערבית מדוברת" />
+    <meta name="Keywords" content="רשימת מילים, אוסף מילים, ערבית מדוברת, מילים לשיעור, מילים לכיתה, מילים לשיחה" />
+    <meta property="og:url"     content="https://milon.madrasafree.com/lists.asp?id={{ list.ID }}" />
+    <meta property="og:type"     content="website" />
+    <meta property="og:title"     content="{{ list.listName }} - רשימה אישית" />
+    <meta property="og:description"     content="רשימת מילים אישית בנושא - {{ list.listName }} | מילון ערבית מדוברת" />
+    <meta property="og:image"           content="https://milon.madrasafree.com/img/lists/{{ list.ID }}.png" />
+    <link rel="stylesheet" href="../static/css/edit.css" />
+
+    <script type = "text/javascript" src="../static/javascript/time.js"></script>
+
+    <style>
+        h1,h3 {
+            text-align:right;
+        }
+        .pTitle {
+            background-color:#d4eaff;
+            text-align:right;
+            }
+        .ul_inline {
+            margin:0;
+            padding:0;
+            display:flex;
+            justify-content:space-between;
+        }
+        .ul_inline li {
+            display:inline-block;
+        }
+		.viewMenu {
+			list-style:none;
+			padding:0;
+		}
+
+		.viewMenu li {
+			display:inline;
+		}
+
+		.button {
+			background:#ffffff;
+			border:1px solid #4191c2;
+			color:#4191c2;
+			cursor:pointer;
+			padding:5px 10px;
+		}
+
+		.button:hover:not(.active) {
+			background:#41b0c2;
+			color:white;
+		}
+		
+		.active {
+			background:#4191c2;
+			color:white;
+			cursor:initial;
+		}
+
+        .star {
+            background: white;
+            border:2px dotted #4191c2;
+            border-radius: 50%;    
+            color:#4191c2;
+            cursor:pointer;
+            float:left;
+            font-size:1.8em;
+            padding:3px 7px 0px 7px;
+            text-align: center;
+            }
+        .starOn { color:#fff900;}
+
+        .eng {padding-left: 2px;}
+        .heb {padding-bottom: 4px; padding-right: 2px;}
+        .heb a:link,.heb a:visited {color:#1988cc !important;}
+
+        .listDiv > span {display:block; line-height: 15px;}
+        .pos,.def {display:inline-block !important; font-size:small ;}
+
+        .result {
+            background-color:#ffffff60;
+            padding:4px;
+            border: 1px dotted #a5d0f3; 
+            margin-bottom: 3px; 
+            box-shadow:0px 6px 17px rgba(144, 190, 234, 0.21);
+            margin-left:20px;
+        }
+        .result:hover, fieldset:hover {background-color: #fff; border:1px solid #a5d0f3; cursor:pointer;}
+        .icons {display: inline-block; position: absolute; top: 0px; left:0px;}
+        .correct {width:15px;opacity:0.4; position: absolute; top:9px; left:5px;}
+        .imgLink {width:25px;opacity:0.5; float: none; position: absolute; top:4px; left: 42px;}
+        .audio {max-width:16px ; opacity: 0.5; float: none; position: absolute; top:9px; left: 26px;}
+        .erroneous {width:15px;opacity:0.7; position: absolute; top:9px; left:5px;}
+
+        @media (max-width:610px) {
+            hr {margin:10px auto; }
+            .eng,.heb {float:none;}
+            .box_workaround {max-width:500px; margin:0 2%;}
+        }
+
+        @media (min-width:610px) {
+            .box_workaround {max-width:500px; margin:0 auto;}
+            .exact .result {
+                font-size: 2em;
+                }
+            .exact mark {
+                min-width:130px;
+                }
+            hr {margin:30px auto; }
+        }
+                .eng, .heb {
+                float: none;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="team/js/jquery.list.update.js"></script> <!-- THIS HAS THE JSON CODE-->
+    <script>
+        
+        $(document).ready(function(){
+            // HIDES / UNHIDES
+            $(".hidden").hide();
+            $("#message").hide();
+
+            var cnt = "{{ wordsLists|length }}";
+            if (cnt > 1) $("#wordsSum").html(cnt + " מילים");
+        });
+    </script>
+</head>
+<body>
+<style>
+    #container {
+        margin-top:0;
+    }
+</style>
+{% include 'includes/top.html' %}
+
+{% set session_userID = 0 %}
+
+{#
+    startTime = timer()
+    'openDB "arabicWords"
+    openDbLogger "arabicWords","O","lists.asp","main",LID
+    if session_userID then
+        dim starred
+        starred=false
+        mySQL = "SELECT pos FROM listsUsers WHERE list="&LID&" AND user="&session_userID
+        res.open mySQL, con
+            if not res.EOF starred=true
+        res.close
+    endif
+
+    mySQL = "SELECT DISTINCT words.id, words.show, words.arabic, words.arabicWord, words.hebrewTranslation, words.hebrewDef, words.pronunciation, words.status, words.imgLink, words.partOfSpeach, words.gender, words.number, wordsLists.listID, wordsMedia.mediaID, wordsLists.pos FROM (words INNER JOIN wordsLists ON words.id = wordsLists.wordID) LEFT JOIN wordsMedia ON words.id = wordsMedia.wordID WHERE (((wordsLists.listID)=" & LID & ")" &sqlShow&") ORDER BY "& order
+    res.open mySQL, con 
+#}
+
+<div class="table">
+    <button class="button" onclick="location.href='lists.all.asp'" style="font-size:medium;">רשימות אישיות</button>
+    <span class="star" onclick="location.href='listsToggle.asp?lid={{ list.ID }}'">
+        {% if starred %}
+            <span class="material-icons" title="הסרה ממועדפים">star</span>
+        {% else %}
+            <span class="material-icons" title="הוספה למועדפים">star_border</span>
+        {% endif %}
+    </span>
+</div>
+
+<style>
+    #listHead {
+        background-color:#d4eaff;
+        border:2px solid #4794c4;
+        color:#4794c4;
+        margin:10px auto;
+    }
+
+    #listHead h1 {
+        margin:0;
+    }
+    #listHead td {
+        border-bottom: 1px solid #4794c4;
+        padding:2px 6px;
+    }
+</style>
+
+<table id="listHead" class="table">
+    <tr>
+        <td><h1>{{ list.listName }}</h1></td>
+        <td style="width:30px; text-align:center;">
+            <span 
+                class="material-icons" 
+                title="{{ list_dict['privacy_type'] }}">
+                {{ list_dict["privacy_icon"] }}
+            </span>
+        </td>
+    </tr>
+    {% if list.listDesc|length > 0 %}
+    <tr>
+        <td colspan="2" style="padding:6px; background-color:#e8f4ff;">
+            {{ list.listDesc }}
+        </td>
+    </tr>
+    {% endif %}
+    <tr>
+        <td colspan="2" style="padding:6px; font-size:0.8em; text-align:center;">
+            <ul class="ul_inline">
+                <li><span id="wordsSum">...</span></li>
+                <li style="text-align:left;">
+                   <a href="profile.asp?id={{ list.creator }}">{{ list_dict["listCreatorUsername"] }}</a>
+                    
+                </li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<table class="table" style="font-size:0.8em; color:#ababab;">
+    <tr>
+        <td>
+            {% if list_dict["str2hebDate_lastUpdateUTC"] != "" %}
+                    עריכה אחרונה - {{ list_dict["str2hebDate_lastUpdateUTC"] }}
+            {% endif %}
+        </td>
+        <td style="text-align:left;">
+            נוצר ב-{{ list_dict["str2hebDate_creationTimeUTC"] }}
+        </td>
+    </tr>
+</table>
+
+
+<div class="table">
+    <ul class="viewMenu">
+        <li>
+            <button class="button active">רשימה</button> 
+            <button class="button" onclick="location.href='games.mem.list.asp?lid={{ list.ID }}';">קלפי זיכרון</button>
+            <button class="button" onclick="location.href='games.mem.pics.asp?lid={{ list.ID }}';">תמונות לחיצות</button>
+        </li>
+        <li style="DISPLAY:NONE;"><span class="star{% if starred %} starOn {% endif %}" title="מועדפים" onclick="location.href='listsToggle.asp?lid={{ list.ID }}'">★</span></li>
+    </ul>
+</div>
+
+
+<div class="box_workaround">
+    {% for word in words %}
+    <div>
+        {{ word_result(word) }}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="table" style="text-align:right; font-weight: 400; font-size:.8em; padding-bottom: 8px;">
+
+{% if session_userID == creatorID %}
+
+    <div style="padding:10px; background:#ffb6b655; border:0px solid #ffb6b6; margin:10px auto;">
+        <h4 style="margin:0 auto 5px auto;">ניהול רשימה</h4>
+        <li class="button" onclick="location.href='listsEdit.asp?id={{ list.ID }}'">עריכת רשימה</li>
+        
+        {% if session_userID == 1 or session_userID == 73 or session_userID == 76 %}
+
+        <div class="newRelDiv" data-ready="no" style="margin-top:5px; font-size:large; text-align:center;">
+            <form action="listsWord.insert.asp" method="post" id="newRelForm" name="newRelForm">
+                <input type="hidden" id="wordID" name="wordID" value="" />
+                <input type="hidden" id="listID" name="listID" value="{{ list.ID }}" />
+                <label for="items">הוספת מילה לרשימה</label>
+                <br>
+                <input class="newRelInput" name="items" autocomplete="off" placeholder="הקלידו מילה..." />
+                <ul class="newRelSelect">
+                </ul>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{#
+
+Function GetName (Names, Num)
+    Dim Arr
+    Arr = Split(Names, "|")
+    GetName = Arr(Num)
+End Function 
+
+if res.EOF 
+#}
+{% if false %}
+    <style>
+        :root {
+            --error-bg-color: #ff000036;
+            --error-txt-color: #910505;
+        }
+        .emptyList {
+            background:var(--error-bg-color);
+            color:var(--error-txt-color);
+            padding:80px 0px;
+            text-align:center;
+        }
+    </style>
+    <div class="table emptyList">טרם נוספו מילים לרשימה זו
+        <br>
+        {% if session_userID == creatorID %}
+        <br><button><a href="welcome.asp#lists">מדריך שימוש קצר</a></button>
+        {% endif %}
+    </div>
+{% endif %}
+{# else
+
+    dim partsOfSpeach,pos,genders,gen,numbers,nums
+    partsOfSpeach = "לא ידוע / אחר|שם עצם|שם תואר|פועל|תואר הפועל|מילית יחס|מילית חיבור|מילת קריאה|תחילית|סופית"
+    genders = "מגדר נטרלי|זכר|נקבה|לא ידוע / לא רלוונטי"
+    numbers = "בלתי ספיר|יחיד|זוגי|רבים|לא ידוע / לא רלוונטי" 
+    
+#}
+
+    <div class="table">
+{% if flase %}
+        {#
+        dim lastID
+        lastID = 0
+	    Do until res.EOF
+            if lastID <> result_id 
+                if result_show == false #}
+                    <div class="listDiv">הערך הבא מוסתר מהגולשים:</div>
+                {# else
+		            countMe = countMe + 1
+                endif #}
+                <div class="result" onclick="location.href='word.asp?id={{ result_id }}';">
+                    <div class="heb" style="position:relative;"><a href="word.asp?id={{ result_id }}">{{ result_hebrewTranslation }}</a>
+                        {% if result_hebrewDef|length > 0 %}
+                            <span class="def">({{ trim(result_hebrewDef) }})
+                        {% endif %}
+                        <span class="icons">
+                        {% if result_imgLink|length > 0 %}
+                            <img src="img/site/photo.png" alt="לערך זה יש תמונה" title="לערך זה יש תמונה" class="imgLink" />
+                        {% endif %}
+                        {% if result_mediaID %}
+                        <img src="img/site/audio.png" alt="לערך זה יש סרטון או אודיו" title="לערך זה יש סרטון או אודיו" class="audio"/>
+                        {% endif %}
+                        {% if result_status == 1 %}
+                        <img src="img/site/correct.png" id="ערך זה נבדק ונמצא תקין" alt="ערך זה נבדק ונמצא תקין" title="ערך זה נבדק ונמצא תקין" class="correct" />
+                        {% elif result_status == -1 %}
+                        <span style="background: #ff2f00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">ערך בבדיקה</span>
+                        {% else %}
+                        <span style="background: #ff8d00; color: #ffffff; font-weight: bold; padding: 4px 10px; border-radius: 3px;">טרם נבדק</span>
+                        {% endif %}
+                    </div>
+                    <div class="arb">{{ result_arabic }}</div>
+                    <div class="arb">{{ result_arabicWord }}</div>
+                    <div class="eng">{{ result_pronunciation }}</div>
+                </div>
+                {% if (session_userID == 1 or session_userID == 73) and session_userID == creatorID %}
+                    <style>
+                        .removeBtn {
+                            bottom:45px;
+                            cursor: pointer;
+                            left:-7px;
+                            opacity:30%;
+                            POSITION:absolute;
+                        }
+                        .removeBtn:hover {
+                            opacity:100%;
+                        }
+                    </style>
+                    <div class="itemActions" style="margin-bottom:10px; POSITION:relative;">
+                        <span class="material-icons removeBtn" title="הסרה מהרשימה">delete</span>
+                        <form style="DISPLAY:NONE;" class="RUSure" action="listsWord.remove.asp">
+                            להסיר מהרשימה?
+                            <button type="submit" class="RUSureYes">כן</button>
+                            <button type="button" class="RUSureNo">אופס, לא משנה</button>
+                            <input type="hidden" name="wordID" value="{{ result_id }}"/>
+                            <input type="hidden" name="listID" value="{{ list.ID }}"/>
+                        </form>
+                    </div>
+              {% endif %}
+                {# lastID = result_id #}
+        {#  endif
+            res.moveNext
+	        Loop 
+        #}
+        </div>
+{% endif %}
+
+{# endif
+res.close #}
+    <span id="countMe" data-count="{{ countMe }}"></span>
+
+    <div id="tagsNew" class="lMenu">
+        <ul>
+            <li style="border:2px #afc3d6 dotted; background-color: #e9f2fb;"><a href="listsNew.asp">+ רשימה חדשה</a></li>
+            <br>
+            {# if session_userID #}
+
+            {% for list in moreLists %}
+                {% if list.id != list_id %}
+                    <li><a href="lists.asp?id={{ list.ID }}">{{ list.listName }}</a></li>
+                    <br>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+    $(function() {
+        $(".removeBtn").on("click",function(){
+            $(this).hide();
+            $(this).closest(".itemActions").find(".RUSure").show();
+        });
+        $(".RUSureNo").on("click",function(){
+            $(this).parent().hide();
+            $(this).closest(".itemActions").find(".removeBtn").show();
+        });
+    });
+</script>
+
+<script type="text/javascript"></script>
+
+{% if session_userID == 1 %}
+<style>
+    #adminTasks {max-width:600px; margin:0 auto;}
+    #adminTasks h3 {color:#a94e00; line-height:0em;}
+    #adminTasks ol {border:1px solid #ff7600; color:#a94e00; background:white; padding:10px 40px;}
+</style>
+<div id="adminTasks">
+    <h3>משימות אדמין לדף זה</h3>
+    <ol>
+        <li>הוספת מילים מהירה בלי עלייה חדשה של הדף</li>
+        <li>איחוד 3 התצוגות לדף אחד - שינוי תצוגה באמצעות JQUERY</li>
+    </ol>
+</div>
+{% endif %}
+
+</body>
+<foot>
+    {% include 'includes/trailer.html' %}
+</foot>
+</html>

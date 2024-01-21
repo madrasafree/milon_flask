@@ -1,10 +1,13 @@
 from dataclasses import dataclass
-from sound_index_function import get_sound_index
+from sound_index_function import get_sound_index, get_clean_word
+import time_functions
+import datetime
 from flask import Flask, redirect, url_for, request, render_template
-from sqlalchemy import func
-from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, Sentences
+from sqlalchemy import select, func, and_, or_, not_
+from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
+from arabic_users_db import ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow
 from includes_utils import get_top_variables, get_trailer_variables
-
+from config.config import config
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -26,6 +29,8 @@ def get_label_data_dicts():
                 tag_size = "0.8em"
             elif 11 <= word_count <= 30:
                 tag_size = "1em"
+            elif 31 <= word_count <= 70:
+                tag_size = "1.3em"
             elif 71 <= word_count <= 120:
                 tag_size = "1.5em"
             elif 121 <= word_count <= 180:
@@ -37,14 +42,55 @@ def get_label_data_dicts():
 
         label_data_dict = {}
         label_data_dict["name"] = label_name
-        label_data_dict["title"] = f"there are {word_count} words in this topic"
+        label_data_dict["title"] = f"ישנן {word_count} מילים בנושא זה"
         label_data_dict["href"] = f"label.asp?id={label_id}"
-        label_data_dict["style_string"] = f"font-size:{tag_size}"
+        label_data_dict["style_string"] = f"font-size:{tag_size};"
 
         label_data_dicts.append(label_data_dict)
 
     return label_data_dicts
 
+def get_label_data_dicts_containing_word(word_id):
+    with ArabicWordsDB() as arabic_words_db:
+        rows = arabic_words_db.session.query(Labels.ID, Labels.labelName).all()
+
+    with ArabicWordsDB() as arabic_words_db:
+        wordsLabels = arabic_words_db.session.query(WordsLabels). \
+            filter(WordsLabels.wordID == word_id).all() 
+    
+    labels_containing_word = [x.labelID for x in wordsLabels if x.wordID == word_id]
+    label_data_dicts = []
+    
+    for label_row in rows:
+        label_id = label_row.ID
+        label_name = label_row.labelName
+
+        if (label_id in labels_containing_word):
+            with ArabicWordsDB() as arabic_words_db:
+                word_count = arabic_words_db.session.query(func.count(WordsLabels.wordID)). \
+                    filter(WordsLabels.labelID == label_id).scalar()
+    
+                if word_count <= 10:
+                    tag_size = "0.8em"
+                elif 11 <= word_count <= 30:
+                    tag_size = "1em"
+                elif 71 <= word_count <= 120:
+                    tag_size = "1.5em"
+                elif 121 <= word_count <= 180:
+                    tag_size = "1.7em"
+                elif 180 <= word_count <= 300:
+                    tag_size = "1.9em"
+                else:
+                    tag_size = "2.4em"
+    
+            label_data_dict = {}
+            label_data_dict["name"] = label_name
+            label_data_dict["title"] = f"there are {word_count} words in this topic"
+            label_data_dict["href"] = f"label.asp?id={label_id}"
+            label_data_dict["style_string"] = f"font-size:{tag_size}"
+    
+            label_data_dicts.append(label_data_dict)
+    return label_data_dicts
 
 @app.route("/labels.asp")
 def labels_handler():
@@ -83,6 +129,106 @@ def label_handler():
                            word_count=word_count, words=words)
 
 
+@app.route("/lists.all.asp")
+def lists_all_handler():
+    list_id = request.args.get("id", "")
+    is_search_submitted = (list_id != "")
+    is_list_found = (not is_search_submitted)
+    
+    # Pull Lists
+    query_columns_lists = { Lists }
+    with ArabicWordsDB() as arabic_words_db:
+        lists_all = arabic_words_db.session.query(*query_columns_lists)    \
+            .filter().all()
+    lists_all = [list for list in lists_all if int(list.privacy) > 1]
+
+    lists_top_new = lists_all
+    lists_top_new.sort(key=lambda x: datetime.datetime.strptime(x.creationTimeUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
+    if (len(lists_top_new) > 10): lists_top_new = lists_top_new[:10]
+    for list in lists_top_new:
+        list.creationTimeUTC = str(datetime.datetime.fromisoformat(list.creationTimeUTC[:-1])).split()[0]
+
+    lists_top_view = lists_all
+    lists_top_view.sort(key=lambda x: int(x.viewCNT), reverse=True)
+    if (len(lists_top_view) > 10): lists_top_view = lists_top_view[:10]
+
+    lists_all_dict = {"lists_top_new": lists_top_new,
+                    "lists_top_view": lists_top_view}
+
+    return render_template("lists.all.html",
+                                is_search_submitted = is_search_submitted,
+                                is_list_found = is_list_found,
+                                lists_all_dict = lists_all_dict)
+
+@app.route("/lists.asp")
+def lists_handler():
+    list_id = request.args.get("id", "")
+    is_search_submitted = (list_id != "")
+
+    # Pull List
+    query_columns_lists = { Lists }
+    with ArabicWordsDB() as arabic_words_db:
+        list = arabic_words_db.session.query(*query_columns_lists)    \
+            .filter(Lists.ID == list_id).first()
+    is_list_found = (list is not None)
+
+    if (not is_search_submitted) or (is_search_submitted and not is_list_found):
+        return redirect(f"lists.all.asp?id={list_id}", code=302)
+
+    # Pull List's Creator
+    query_columns_users = { Users }
+    with ArabicUsersDB() as arabic_users_db:
+        user = arabic_users_db.session.query(*query_columns_users)    \
+            .filter(Users.id == list.creator).first()
+
+    # Pull WordsIDs from List
+    query_columns_wordsLists = { WordsLists.wordID }
+    with ArabicWordsDB() as arabic_words_db:
+        wordsLists = arabic_words_db.session.query(*query_columns_wordsLists)    \
+            .filter(WordsLists.listID == list_id).all()
+
+    # Pull Words from List
+    words = []
+    query_columns_words = { Words }
+    for wordID in wordsLists:
+        with ArabicWordsDB() as arabic_words_db:
+            word = arabic_words_db.session.query(*query_columns_words)    \
+                .filter(Words.id == wordID).first()
+        words.append(word)
+
+    # Pull 7 most-recently-updated public lists from same creator
+    with ArabicWordsDB() as arabic_words_db:
+        moreLists = arabic_words_db.session.query(*query_columns_lists)    \
+            .filter(Lists.creator == list.creator).all()
+    moreLists = [list for list in moreLists if int(list.privacy) > 1]
+    moreLists.sort(key=lambda x: datetime.datetime.strptime(x.lastUpdateUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
+    if (len(moreLists) > 10): moreLists = moreLists[:10]
+
+    privacy_dict={
+        0:["רשימה פרטית","lock"],
+        1:["רשימה לבעלי קישור","lock_open"],
+        2:["רשימה פומבית","public"],
+        3:["רשימה משותפת","group"],
+    }
+
+    list_dict={
+        "privacy_type": privacy_dict[int(list.privacy)][0],
+        "privacy_icon": privacy_dict[int(list.privacy)][1],
+        "listCreatorUsername" : user.username,
+        "str2hebDate_lastUpdateUTC": time_functions.Str2hebDate(list.lastUpdateUTC),
+        "str2hebDate_creationTimeUTC": time_functions.Str2hebDate(list.creationTimeUTC),
+    }
+
+    return render_template("lists.html",
+                            is_search_submitted = is_search_submitted,
+                            is_list_found = is_list_found,
+                            list_id = list_id,
+                            list = list,
+                            list_dict = list_dict,
+                            wordsLists = wordsLists,
+                            words = words,
+                            moreLists = moreLists)
+
 @app.route("/sentences.asp")
 def sentences_handler():
     with ArabicWordsDB() as arabic_words_db:
@@ -92,12 +238,39 @@ def sentences_handler():
     with ArabicWordsDB() as arabic_words_db:
         sentences = arabic_words_db.session.query(Sentences).all()
 
-    return render_template("sentences.html", sentence_count=sentence_count, sentences=sentences)
+    return render_template("sentences.html",
+                            sentence_count=sentence_count,
+                            sentences=sentences)
 
 @app.route("/guide.asp")
 def guide_handler():
     return render_template("guide.html")
 
+@app.route("/clock.asp")
+def clock_handler():
+    return render_template("clock.html",
+                            )
+
+@app.route("/word.asp")
+def word_handler():
+    word_id = request.args.get("id", "")
+    label_data_dicts = get_label_data_dicts_containing_word(word_id)
+
+    query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
+                    Words.imgLink, Words.partOfSpeach, Words.gender, Words.number}
+
+    with ArabicWordsDB() as arabic_words_db:
+        word = arabic_words_db.session.query(*query_columns)    \
+            .filter(and_(Words.id == word_id)).first()
+
+    return render_template("word.html",
+                            word_id = word_id,
+                            word = word,
+                            label_data_dicts = label_data_dicts)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('not_found.html'), 404
 
 @dataclass
 class Image:
@@ -120,43 +293,117 @@ def games_mem_handler():
 
 @app.route("/")
 def root_handler():
+    # INITIALIZE VARIABLES
+    is_search_submitted = True
+    is_search_string_valid = True
+    is_search_string_short = False
+    label_data_dicts = []
+    cleaned_word = ""
+    sound_index = ""
+    exact_match_words = []
+    sound_like_words = []
+    letter_like_words = []
+    search_words = []
+    short_words = []
+
     label_data_dicts = get_label_data_dicts()
-
     search_string = request.args.get("searchString", "")
-    search_string = search_string.strip()
+    search_string_strip = search_string.strip()
+    cleaned_word = get_clean_word(search_string_strip)
 
-    if search_string.isalpha():  # TODO
-        is_search_string_valid = True
+    #DEBUG
+    print("search_string = " + search_string)
+    print("search_string_strip = " + search_string_strip)
+    print("cleaned_word = " + cleaned_word)
 
-        with ArabicWordsDB() as arabic_words_db:
-            exact_match_words = arabic_words_db.session. \
-                query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                      Words.pronunciation).filter(Words.hebrewClean == search_string).all()
+    query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
+                        Words.imgLink}#, WordsMedia.wordID, WordsMedia.mediaID, Media.id }
 
-        sound_index = get_sound_index(search_string)
+    invalid_word_filter = and_(
+        Words.show == "True",
+        Words.hebrewTranslation != "None",
+        Words.arabic != "None",
+        Words.arabicWord != "None"
+    )
 
-        with ArabicWordsDB() as arabic_words_db:
-            sound_like_words = arabic_words_db.session. \
-                query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
-                      Words.pronunciation).filter(Words.sndxArabicV1.like(f"%{sound_index}%"),
-                                                  Words.sndxHebrewV1.like(f"%{sound_index}%")).all()
+    if (len(search_string) == 0):
+        is_search_submitted = False
+        print("is_search_submitted = " + str(is_search_submitted))
 
-
-    else:
+    if (len(cleaned_word) == 0):
+        # CASE -1: Invalid Search due to Symbols or foreign Language
         is_search_string_valid = False
-        exact_match_words = []
-        sound_index = ""
-        sound_like_words = []
+        print("is_search_string_valid = " + str(is_search_string_valid))
+    
+    if (len(cleaned_word) == 1):
+        # CASE 0: "ShortWords": One letter only
+        is_search_string_short = True
+        with ArabicWordsDB() as arabic_words_db:
+            short_words = arabic_words_db.session.query(*query_columns)    \
+                .filter(and_(invalid_word_filter,       # TODO: FIX!
+                            or_(Words.hebrewClean == cleaned_word,
+                                Words.arabicClean == cleaned_word,
+                                Words.arabicHebClean == cleaned_word)
+                            )).all()
+                #.filter(WordsShort.ID).all() \
+                #.filter(WordsShort.sStr == cleaned_word).all()
 
+    if (len(cleaned_word)>1):
+        # CASE 1: "Identical": Words exactly as searched
+        with ArabicWordsDB() as arabic_words_db:
+            exact_match_words = arabic_words_db.session.query(*query_columns)    \
+                .filter(and_(invalid_word_filter,       # TODO: FIX!
+                            or_(Words.hebrewClean == cleaned_word,
+                                Words.arabicClean == cleaned_word,
+                                Words.arabicHebClean == cleaned_word)
+                            )).all()
+        # CASE 2: "Soundex": Words sound like
+        sound_index = get_sound_index(search_string_strip)
+        if (len(sound_index)>0):
+            with ArabicWordsDB() as arabic_words_db:
+                sound_like_words = arabic_words_db.session.query(*query_columns) \
+                    .filter(and_(invalid_word_filter,
+                                or_(Words.sndxArabicV1.like(f"%{sound_index}%"),
+                                    Words.sndxHebrewV1.like(f"%{sound_index}%"))
+                                )).all()
+        # CASE 3: "Like": Words with same letters
+        with ArabicWordsDB() as arabic_words_db:
+            letter_like_words = arabic_words_db.session.query(*query_columns)    \
+                    .filter(and_(invalid_word_filter,
+                                Words.hebrewClean.like(f"%{cleaned_word}%")
+                                )).all()
+        # CASE 4: "SearchWords": Additional results: Typical errors, Synonyms
+        with ArabicWordsDB() as arabic_words_db:
+            search_words = arabic_words_db.session.query(*query_columns) \
+                    .filter(and_(invalid_word_filter,
+                                Words.searchString.like(f"%{search_string}%")
+                                )).all()
+        
+        # DEBUG
+        print(exact_match_words)
+        print(sound_like_words)
+        print(letter_like_words)
+        print(search_words)
+        # Remove duplications between lists!
+        sound_like_words = [x for x in sound_like_words if x not in set(exact_match_words)]
+        letter_like_words = [x for x in letter_like_words if x not in set(exact_match_words + sound_like_words)]
+        search_words = [x for x in search_words if x not in set(exact_match_words + sound_like_words + letter_like_words)]
+  
     return render_template("default.html",
-                           label_data_dicts=label_data_dicts,
-                           is_search_string_valid=is_search_string_valid,
-                           exact_match_words=exact_match_words,
-                           sound_index=sound_index,
-                           sound_like_words=sound_like_words)
-
-
-
+                            search_string = search_string,
+                            label_data_dicts=label_data_dicts,
+                            is_search_submitted = is_search_submitted,
+                            is_search_string_valid=is_search_string_valid,
+                            is_search_string_short=is_search_string_short,
+                            cleaned_word=cleaned_word,
+                            sound_index=sound_index,
+                            exact_match_words=exact_match_words,
+                            sound_like_words=sound_like_words,
+                            letter_like_words=letter_like_words,
+                            search_words=search_words,
+                            short_words=short_words)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8081, debug=True)
+    #app.run(host="192.168.2.109", port=5000, debug=True)
+    #app.run(host="0.0.0.0", port=8081, debug=True)
+    app.run(host="127.0.0.1", port=5431, debug=True)

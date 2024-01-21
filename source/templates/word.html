@@ -1,0 +1,230 @@
+<!--#include file="inc/inc.asp"-->
+<!--#include file="team/inc/functions/string.asp"-->
+<!--#include file="inc/functions/functions.asp"-->
+<!--#include file="inc/time.asp"-->
+
+<!DOCTYPE html>
+<html style="height:100%;">
+<head>
+    {% include 'includes/header.html' %}
+    {% from "includes/word_result_macro.html" import word_result %}
+    <title>מילון ערבית מדוברת - לדוברי עברית</title>
+    <meta name="Description" content="המילון לערבית מדוברת (לדוברי עברית) הוא שירות חינמי שנועד לעזור לקהילת לומדי הערבית המדוברת" />
+    <meta name="Keywords" content="מילון עברי ערבי, תרגום עברית ערבית, מילון ערבי עברי, תרגום מעברית לערבית, תרגום ערבית עברית, מתרגם עברית ערבית" /> <!-- since 2021-06 -->
+    <meta property="og:title" content="מילון ערבית מדוברת - לדוברי עברית" />
+    <meta property="og:description" content="המילון לערבית מדוברת (לדוברי עברית) הוא שירות חינמי שנועד לעזור לקהילת לומדי הערבית המדוברת" />
+    <meta property="og:url" content="https://milon.madrasafree.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="static/images/site/og-image.png">
+    <style>
+        /* loading animation START - this code is DUPLIC from edit.css - MERGE needed */
+        .lds-ring {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .lds-ring div {
+            box-sizing: border-box;
+            display: block;
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            margin: 8px;
+            border: 8px solid #fff;
+            border-radius: 50%;
+            animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            border-color: #82b1de transparent transparent transparent;
+        }
+        .lds-ring div:nth-child(1) {
+            animation-delay: -0.45s;
+        }
+        .lds-ring div:nth-child(2) {
+            animation-delay: -0.3s;
+        }
+        .lds-ring div:nth-child(3) {
+            animation-delay: -0.15s;
+        }
+        @keyframes lds-ring {
+            0% {
+            transform: rotate(0deg);
+            }
+            100% {
+            transform: rotate(360deg);
+            }
+        }
+        /* loading animation END */
+
+        .thumb { text-align: center; margin:10px auto; font-size:x-small;}
+        .thumb img {max-width:90%; border:1px dashed #bbb; max-height:200px;}
+        .credit {max-width:90%; margin: 2px auto;}
+        .activities {display:table; width:90%; margin: 0 auto; border:solid #c267df; border-width:2px 0; background:#c267df26;}
+        .activityBox {display:table-row; font-size:small;}
+        .activityBox > div {display:table-cell; padding:3px 5px;}
+        .activityBox:nth-child(2) > div {border-top: 1px dotted #c267df70; border-bottom: 1px dotted #c267df70;}
+        .activityBox div:last-child {text-align:left;}
+        .activeUserImg {DISPLAY:NONE; background:white; width:30px; border-radius:30%; box-shadow:#2a3035 0px 0px 4px;}
+        #boxMenu {display:flex; justify-content:center; flex-wrap:wrap; max-width:490px; margin:50px auto; text-align: center;}
+        #boxMenu > div {display: inline-block; margin-top:5px; opacity:.7;}
+        #boxMenu > div:hover {opacity:1;}
+        #boxMenu > div > a:hover {text-decoration:none;}
+        #boxMenu > div > a > div {
+            background:lightgreen;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            width:144px;
+            height:42px;
+            color:black;
+            margin:2px;
+            }
+        #boxMenu img {opacity: .7;}
+        #boxMenu img:hover {opacity: 1;}
+        #cnt2,#cnt3,#cnt4,#test5 {text-align:right; background:#fff5d7b8; padding-right:10px; border-right: 6px solid #8690ff; color:#8690ff; font-size:1em;}
+        .eng {padding-left: 2px;}
+        .exact {margin-bottom:10px;counter-increment: mega-step;}
+        #exact::before {counter-increment: exactCount; content: counter(mega-step);display: block; padding: 5px 5px 3px 5px; background: #ffffff; width: 10%; text-align: center; border: 1px solid #a5d0f3; border-bottom: 0; margin-top:20px;}
+        .heb {padding-bottom: 4px; padding-right: 2px;}
+        .heb a:link,.heb a:visited {color:#1988cc !important;}
+        .media {margin:0px auto 10px auto; text-align:center; max-width:700px;}
+        .newWord {display:inline-block; font-size: 1em; font-weight:bold; }
+        .newWord a {colorx:#1988cc; }
+        .newWord a:hover {text-decoration: underline;}
+        .noResult {text-align:center; border:1px dotted #bbb; padding: 4px 0; max-width: 450px; margin:0 auto;}
+
+        fieldset { width:90%; border: 1px dashed #c0c0c0; background-color:#ffffff90; margin:0 auto 6px auto; padding:0;}
+        legend {border: 1px dotted #bbb; background: #fefefe; padding: 0 12px; text-align: center;}
+
+
+        .notice {max-width: 440px; margin:30px auto; text-align:center;padding: 10px 0; border-radius: 20px;}
+        .notice:hover {color:black; cursor:pointer; font-weight: 400; background-color:#b6eaf5; }
+        .info {color:#43808e; background: #a6eaf970; border:1px solid #8ab8c3; }
+        .info:hover {background-color: #a6eaf9; border-color:#124e5d;}
+        .feedback {color:#ad8722;border:1px solid #f5bd00; background-color: #ffff0037;}
+        .feedback:hover {background-color: #ffff0057;}
+
+        .or { font-size:small;}
+        .pos,.def {font-size:small;}
+        #related {padding:4px;}
+        .showString {word-break: break-all; font-size:small; text-align:center; margin-bottom:10px;}
+        .search {max-width: 450px; margin: 20px auto 60px auto;}
+        .search > form {background-color:#d5ebfe; padding:10px;}
+        #searchString,#submit {padding:4px; font-size:large;}
+        .icons {display: inline-block; position: absolute; top: 0px; left:0px;}
+        .icons mark {
+            font-size: 0.8em;
+            left: 0px;
+            min-width: 70px;
+            padding: 4px;
+            position: absolute;
+            text-align: center;
+            top: 25px;
+        }
+        .correct {width:15px;opacity:0.4; position: absolute; top:9px; left:5px;}
+        .imgLink {width:25px;opacity:0.5; float: none; position: absolute; top:4px; left: 42px;}
+        .audio {max-width:16px ; opacity: 0.5; float: none; position: absolute; top:9px; left: 26px;}
+        .erroneous {width:15px;opacity:0.7; position: absolute; top:9px; left:5px;}
+
+        body {counter-reset: exactCount;}
+        h1 {display:none;}
+        h2 {
+            text-align:center;
+            font-size:small;
+            font-weight:400;
+            margin:20px auto 10px;
+            background-color:#d5ebfe;
+            line-height:2;
+            }
+        h2 span, h2 div {display: inline-block;}
+        hr {border: 0; height: 1px;
+          background-image: -webkit-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+          background-image: -moz-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+          background-image: -ms-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+          background-image: -o-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+        }
+
+        #madrasa-welcome{
+            /* display:flex;
+            flex-wrap:wrap; */
+        }
+        #madrasa-welcome .madrasa-welcome-text{
+            flex:2;
+            font-size:20px;
+            font-weight:800;
+            max-width:390px;
+            margin:0 auto;
+        }
+         #madrasa-welcome .madrasa-welcome-img{
+            flex:1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+
+
+        @media (max-width:610px) {
+            hr {margin:10px auto; }
+            .eng,.heb {float:none;}
+            .box {max-width:500px; margin:0 2%;}
+        }
+
+        @media (min-width:610px) {
+            .box {max-width:500px; margin:0 auto;}
+            .exact .result {
+                font-size: 2em;
+                }
+            .exact mark {
+                min-width:130px;
+                }
+            hr {margin:30px auto; }
+        }
+                .eng, .heb {
+                float: none;
+        }
+    </style>
+
+    <script type="text/javascript" src="static/javascript/soundex.js"></script>     <!-- Original soundex() in JS -->
+
+    <script>
+        $(document).ready(function(){
+
+            // HIDDEN ON PAGE LOAD
+            $("#tagsCloud").show();
+
+            //$("#msgRsltsExct").show();
+            
+            // HIDES / UNHIDES LABELS LIST
+            $("#tagsTile").click(function(){
+                $("#tagsCloud").slideToggle();
+                return false;
+            });
+        });
+
+    </script>
+</head>
+<body>
+    {% include 'includes/top.html' %}
+
+<div class="box">
+    <h1>מילון ערבית מדוברת</h1>
+
+    <div class="exact">
+        {{ word_result(word) }}
+    </div>
+
+    {% include 'includes/label_tags_cloud.html' %}
+
+<script>
+    $("#searchSubmit").on("submit",function(){
+        $("#loadingAnm").show();
+        return true;
+    });
+</script>
+
+</body>
+<foot>
+    {% include 'includes/trailer.html' %}
+</foot>
+</html>
+
