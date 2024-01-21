@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import itertools
 from sound_index_function import get_sound_index, get_clean_word
 import time_functions
 import datetime
@@ -135,25 +136,44 @@ def lists_all_handler():
     is_search_submitted = (list_id != "")
     is_list_found = (not is_search_submitted)
     
-    # Pull Lists
+    # Pull all Lists
     query_columns_lists = { Lists }
     with ArabicWordsDB() as arabic_words_db:
         lists_all = arabic_words_db.session.query(*query_columns_lists)    \
             .filter().all()
     lists_all = [list for list in lists_all if int(list.privacy) > 1]
 
+    # Pull Top 10 Newest lists
     lists_top_new = lists_all
     lists_top_new.sort(key=lambda x: datetime.datetime.strptime(x.creationTimeUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
     if (len(lists_top_new) > 10): lists_top_new = lists_top_new[:10]
-    for list in lists_top_new:
-        list.creationTimeUTC = str(datetime.datetime.fromisoformat(list.creationTimeUTC[:-1])).split()[0]
+    for l in lists_top_new:
+        l.creationTimeUTC = str(datetime.datetime.fromisoformat(l.creationTimeUTC[:-1])).split()[0]
 
+    # Pull Top 10 Viewed lists
     lists_top_view = lists_all
     lists_top_view.sort(key=lambda x: int(x.viewCNT), reverse=True)
     if (len(lists_top_view) > 10): lists_top_view = lists_top_view[:10]
 
+    # Pull all Usernames
+    query_columns_users = { Users.id, Users.username }
+    with ArabicUsersDB() as arabic_users_db:
+        users_all = arabic_users_db.session.query(*query_columns_users)    \
+            .filter().all()
+    for l in lists_all:
+        l.creator = [user.username for user in users_all if (user.id == l.creator)][0]
+    
+    # Create list of Lists in alphabet order
+    lists_all.sort(key=lambda x: x.listName, reverse=False)
+    lists_all_alphabet = []
+    for letter in itertools.groupby(lists_all, lambda x: x.listName[0]):
+        lists_with_letter = list(letter[1])
+        lists_all_alphabet.append(lists_with_letter)
+    
+    # Reorganize Data
     lists_all_dict = {"lists_top_new": lists_top_new,
-                    "lists_top_view": lists_top_view}
+                    "lists_top_view": lists_top_view,
+                    "lists_all_alphabet": lists_all_alphabet}
 
     return render_template("lists.all.html",
                                 is_search_submitted = is_search_submitted,
@@ -168,9 +188,9 @@ def lists_handler():
     # Pull List
     query_columns_lists = { Lists }
     with ArabicWordsDB() as arabic_words_db:
-        list = arabic_words_db.session.query(*query_columns_lists)    \
+        list_element = arabic_words_db.session.query(*query_columns_lists)    \
             .filter(Lists.ID == list_id).first()
-    is_list_found = (list is not None)
+    is_list_found = (list_element is not None)
 
     if (not is_search_submitted) or (is_search_submitted and not is_list_found):
         return redirect(f"lists.all.asp?id={list_id}", code=302)
@@ -179,7 +199,7 @@ def lists_handler():
     query_columns_users = { Users }
     with ArabicUsersDB() as arabic_users_db:
         user = arabic_users_db.session.query(*query_columns_users)    \
-            .filter(Users.id == list.creator).first()
+            .filter(Users.id == list_element.creator).first()
 
     # Pull WordsIDs from List
     query_columns_wordsLists = { WordsLists.wordID }
@@ -199,11 +219,12 @@ def lists_handler():
     # Pull 7 most-recently-updated public lists from same creator
     with ArabicWordsDB() as arabic_words_db:
         moreLists = arabic_words_db.session.query(*query_columns_lists)    \
-            .filter(Lists.creator == list.creator).all()
-    moreLists = [list for list in moreLists if int(list.privacy) > 1]
+            .filter(Lists.creator == list_element.creator).all()
+    moreLists = [l for l in moreLists if int(l.privacy) > 1]
     moreLists.sort(key=lambda x: datetime.datetime.strptime(x.lastUpdateUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
     if (len(moreLists) > 10): moreLists = moreLists[:10]
 
+    # Reorganize Data
     privacy_dict={
         0:["רשימה פרטית","lock"],
         1:["רשימה לבעלי קישור","lock_open"],
@@ -212,18 +233,18 @@ def lists_handler():
     }
 
     list_dict={
-        "privacy_type": privacy_dict[int(list.privacy)][0],
-        "privacy_icon": privacy_dict[int(list.privacy)][1],
+        "privacy_type": privacy_dict[int(list_element.privacy)][0],
+        "privacy_icon": privacy_dict[int(list_element.privacy)][1],
         "listCreatorUsername" : user.username,
-        "str2hebDate_lastUpdateUTC": time_functions.Str2hebDate(list.lastUpdateUTC),
-        "str2hebDate_creationTimeUTC": time_functions.Str2hebDate(list.creationTimeUTC),
+        "str2hebDate_lastUpdateUTC": time_functions.Str2hebDate(list_element.lastUpdateUTC),
+        "str2hebDate_creationTimeUTC": time_functions.Str2hebDate(list_element.creationTimeUTC),
     }
 
     return render_template("lists.html",
                             is_search_submitted = is_search_submitted,
                             is_list_found = is_list_found,
                             list_id = list_id,
-                            list = list,
+                            list_element = list_element,
                             list_dict = list_dict,
                             wordsLists = wordsLists,
                             words = words,

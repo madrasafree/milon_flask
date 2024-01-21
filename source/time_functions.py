@@ -54,7 +54,6 @@ def AR2UTC(date):
 
 # prints STRING as Hebrew Date
 def Str2hebDate(strDate):
-    print(strDate)
     if (strDate == "" or strDate == "None"):
         return ""
     day = strDate[8:10] + " ל"
