@@ -7,14 +7,14 @@
 <head>
     {% include 'includes/header.html' %}
     {% from "includes/word_result_macro.html" import word_result %}
-    <title>{{ list.listName }} - רשימה אישית</title>
-    <meta name="Description" content="רשימת מילים אישית בנושא - {{ list.listName }} | מילון ערבית מדוברת" />
+    <title>{{ list_element.listName }} - רשימה אישית</title>
+    <meta name="Description" content="רשימת מילים אישית בנושא - {{ list_element.listName }} | מילון ערבית מדוברת" />
     <meta name="Keywords" content="רשימת מילים, אוסף מילים, ערבית מדוברת, מילים לשיעור, מילים לכיתה, מילים לשיחה" />
-    <meta property="og:url"     content="https://milon.madrasafree.com/lists.asp?id={{ list.ID }}" />
+    <meta property="og:url"     content="https://milon.madrasafree.com/lists.asp?id={{ list_element.ID }}" />
     <meta property="og:type"     content="website" />
-    <meta property="og:title"     content="{{ list.listName }} - רשימה אישית" />
-    <meta property="og:description"     content="רשימת מילים אישית בנושא - {{ list.listName }} | מילון ערבית מדוברת" />
-    <meta property="og:image"           content="https://milon.madrasafree.com/img/lists/{{ list.ID }}.png" />
+    <meta property="og:title"     content="{{ list_element.listName }} - רשימה אישית" />
+    <meta property="og:description"     content="רשימת מילים אישית בנושא - {{ list_element.listName }} | מילון ערבית מדוברת" />
+    <meta property="og:image"           content="https://milon.madrasafree.com/img/lists/{{ list_element.ID }}.png" />
     <link rel="stylesheet" href="../static/css/edit.css" />
 
     <script type = "text/javascript" src="../static/javascript/time.js"></script>
@@ -162,7 +162,7 @@
 
 <div class="table">
     <button class="button" onclick="location.href='lists.all.asp'" style="font-size:medium;">רשימות אישיות</button>
-    <span class="star" onclick="location.href='listsToggle.asp?lid={{ list.ID }}'">
+    <span class="star" onclick="location.href='listsToggle.asp?lid={{ list_element.ID }}'">
         {% if starred %}
             <span class="material-icons" title="הסרה ממועדפים">star</span>
         {% else %}
@@ -190,7 +190,7 @@
 
 <table id="listHead" class="table">
     <tr>
-        <td><h1>{{ list.listName }}</h1></td>
+        <td><h1>{{ list_element.listName }}</h1></td>
         <td style="width:30px; text-align:center;">
             <span 
                 class="material-icons" 
@@ -199,10 +199,10 @@
             </span>
         </td>
     </tr>
-    {% if list.listDesc|length > 0 %}
+    {% if list_element.listDesc|length > 0 %}
     <tr>
         <td colspan="2" style="padding:6px; background-color:#e8f4ff;">
-            {{ list.listDesc }}
+            {{ list_element.listDesc }}
         </td>
     </tr>
     {% endif %}
@@ -211,7 +211,7 @@
             <ul class="ul_inline">
                 <li><span id="wordsSum">...</span></li>
                 <li style="text-align:left;">
-                   <a href="profile.asp?id={{ list.creator }}">{{ list_dict["listCreatorUsername"] }}</a>
+                   <a href="profile.asp?id={{ list_element.creator }}">{{ list_dict["listCreatorUsername"] }}</a>
                     
                 </li>
             </ul>
@@ -237,10 +237,10 @@
     <ul class="viewMenu">
         <li>
             <button class="button active">רשימה</button> 
-            <button class="button" onclick="location.href='games.mem.list.asp?lid={{ list.ID }}';">קלפי זיכרון</button>
-            <button class="button" onclick="location.href='games.mem.pics.asp?lid={{ list.ID }}';">תמונות לחיצות</button>
+            <button class="button" onclick="location.href='games.mem.list.asp?lid={{ list_element.ID }}';">קלפי זיכרון</button>
+            <button class="button" onclick="location.href='games.mem.pics.asp?lid={{ list_element.ID }}';">תמונות לחיצות</button>
         </li>
-        <li style="DISPLAY:NONE;"><span class="star{% if starred %} starOn {% endif %}" title="מועדפים" onclick="location.href='listsToggle.asp?lid={{ list.ID }}'">★</span></li>
+        <li style="DISPLAY:NONE;"><span class="star{% if starred %} starOn {% endif %}" title="מועדפים" onclick="location.href='listsToggle.asp?lid={{ list_element.ID }}'">★</span></li>
     </ul>
 </div>
 
@@ -255,18 +255,17 @@
 
 <div class="table" style="text-align:right; font-weight: 400; font-size:.8em; padding-bottom: 8px;">
 
-{% if session_userID == creatorID %}
-
+    {% if session_userID == creatorID %}
     <div style="padding:10px; background:#ffb6b655; border:0px solid #ffb6b6; margin:10px auto;">
         <h4 style="margin:0 auto 5px auto;">ניהול רשימה</h4>
-        <li class="button" onclick="location.href='listsEdit.asp?id={{ list.ID }}'">עריכת רשימה</li>
+        <li class="button" onclick="location.href='listsEdit.asp?id={{ list_element.ID }}'">עריכת רשימה</li>
         
         {% if session_userID == 1 or session_userID == 73 or session_userID == 76 %}
 
         <div class="newRelDiv" data-ready="no" style="margin-top:5px; font-size:large; text-align:center;">
             <form action="listsWord.insert.asp" method="post" id="newRelForm" name="newRelForm">
                 <input type="hidden" id="wordID" name="wordID" value="" />
-                <input type="hidden" id="listID" name="listID" value="{{ list.ID }}" />
+                <input type="hidden" id="listID" name="listID" value="{{ list_element.ID }}" />
                 <label for="items">הוספת מילה לרשימה</label>
                 <br>
                 <input class="newRelInput" name="items" autocomplete="off" placeholder="הקלידו מילה..." />
@@ -374,7 +373,7 @@ if res.EOF
                             <button type="submit" class="RUSureYes">כן</button>
                             <button type="button" class="RUSureNo">אופס, לא משנה</button>
                             <input type="hidden" name="wordID" value="{{ result_id }}"/>
-                            <input type="hidden" name="listID" value="{{ list.ID }}"/>
+                            <input type="hidden" name="listID" value="{{ list_element.ID }}"/>
                         </form>
                     </div>
               {% endif %}

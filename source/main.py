@@ -1,71 +1,40 @@
 from dataclasses import dataclass
-from sound_index_function import get_sound_index, get_clean_word
-import time_functions
+from build.arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
+from build.arabic_users_db import ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow
+import config.config
 import datetime
+import itertools
+import library.functions
 from flask import Flask, redirect, url_for, request, render_template
 from sqlalchemy import select, func, and_, or_, not_
-from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
-from arabic_users_db import ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow
-from includes_utils import get_top_variables, get_trailer_variables
-from config.config import config
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+@dataclass
+class Image:
+    arabic: str
+    arabicWord: str
 
-def get_label_data_dicts():
+def get_label_data_dicts(word_id = None):
     with ArabicWordsDB() as arabic_words_db:
         rows = arabic_words_db.session.query(Labels.ID, Labels.labelName).all()
 
-    label_data_dicts = []
-    for label_row in rows:
-        label_id = label_row.ID
-        label_name = label_row.labelName
-
+    if (word_id != None):
+        # Only labels with word_id
         with ArabicWordsDB() as arabic_words_db:
-            word_count = arabic_words_db.session.query(func.count(WordsLabels.wordID)). \
-                filter(WordsLabels.labelID == label_id).scalar()
+            wordsLabels = arabic_words_db.session.query(WordsLabels). \
+                filter(WordsLabels.wordID == word_id).all() 
+        labels = [x.labelID for x in wordsLabels if x.wordID == word_id]
+    else:
+        # All labels
+        labels = [x.ID for x in rows] 
 
-            if word_count <= 10:
-                tag_size = "0.8em"
-            elif 11 <= word_count <= 30:
-                tag_size = "1em"
-            elif 31 <= word_count <= 70:
-                tag_size = "1.3em"
-            elif 71 <= word_count <= 120:
-                tag_size = "1.5em"
-            elif 121 <= word_count <= 180:
-                tag_size = "1.7em"
-            elif 180 <= word_count <= 300:
-                tag_size = "1.9em"
-            else:
-                tag_size = "2.4em"
-
-        label_data_dict = {}
-        label_data_dict["name"] = label_name
-        label_data_dict["title"] = f"ישנן {word_count} מילים בנושא זה"
-        label_data_dict["href"] = f"label.asp?id={label_id}"
-        label_data_dict["style_string"] = f"font-size:{tag_size};"
-
-        label_data_dicts.append(label_data_dict)
-
-    return label_data_dicts
-
-def get_label_data_dicts_containing_word(word_id):
-    with ArabicWordsDB() as arabic_words_db:
-        rows = arabic_words_db.session.query(Labels.ID, Labels.labelName).all()
-
-    with ArabicWordsDB() as arabic_words_db:
-        wordsLabels = arabic_words_db.session.query(WordsLabels). \
-            filter(WordsLabels.wordID == word_id).all() 
-    
-    labels_containing_word = [x.labelID for x in wordsLabels if x.wordID == word_id]
     label_data_dicts = []
-    
     for label_row in rows:
         label_id = label_row.ID
         label_name = label_row.labelName
 
-        if (label_id in labels_containing_word):
+        if (label_id in labels):
             with ArabicWordsDB() as arabic_words_db:
                 word_count = arabic_words_db.session.query(func.count(WordsLabels.wordID)). \
                     filter(WordsLabels.labelID == label_id).scalar()
@@ -92,12 +61,16 @@ def get_label_data_dicts_containing_word(word_id):
             label_data_dicts.append(label_data_dict)
     return label_data_dicts
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('not_found.html'), 404
+
 @app.route("/labels.asp")
 def labels_handler():
     label_data_dicts = get_label_data_dicts()
 
-    return render_template("labels.html", label_data_dicts=label_data_dicts)
-
+    return render_template("labels.html",
+                            label_data_dicts = label_data_dicts)
 
 @app.route("/label.asp")
 def label_handler():
@@ -105,29 +78,28 @@ def label_handler():
     if not label_id:
         label_id = "no label_id was found"
 
+    label_data_dicts = get_label_data_dicts()
+
     with ArabicWordsDB() as arabic_words_db:
         row = arabic_words_db.session.query(Labels.labelName).filter(Labels.ID == label_id).one()
-
     label_name = row.labelName
 
     with ArabicWordsDB() as arabic_words_db:
         rows = arabic_words_db.session.query(WordsLabels.wordID).filter(WordsLabels.labelID == label_id).all()
-
+    word_count = len(rows)
     all_label_word_ids = [row.wordID for row in rows]
-
 
     with ArabicWordsDB() as arabic_words_db:
         words = arabic_words_db.session.\
             query(Words.id, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef,
                   Words.pronunciation).filter(Words.id.in_(all_label_word_ids)).all()
+    words.sort(key=lambda x: library.functions.get_clean_word(x.arabicWord)[0], reverse=False)
 
-    word_count = len(rows)
-
-    label_data_dicts = get_label_data_dicts()
-
-    return render_template("label.html", label_data_dicts=label_data_dicts, label_name=label_name,
-                           word_count=word_count, words=words)
-
+    return render_template("label.html",
+                            label_data_dicts = label_data_dicts,
+                            label_name = label_name,
+                            word_count = word_count,
+                            words = words)
 
 @app.route("/lists.all.asp")
 def lists_all_handler():
@@ -135,25 +107,44 @@ def lists_all_handler():
     is_search_submitted = (list_id != "")
     is_list_found = (not is_search_submitted)
     
-    # Pull Lists
+    # Pull all Lists
     query_columns_lists = { Lists }
     with ArabicWordsDB() as arabic_words_db:
         lists_all = arabic_words_db.session.query(*query_columns_lists)    \
             .filter().all()
     lists_all = [list for list in lists_all if int(list.privacy) > 1]
 
+    # Pull Top 10 Newest lists
     lists_top_new = lists_all
     lists_top_new.sort(key=lambda x: datetime.datetime.strptime(x.creationTimeUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
     if (len(lists_top_new) > 10): lists_top_new = lists_top_new[:10]
-    for list in lists_top_new:
-        list.creationTimeUTC = str(datetime.datetime.fromisoformat(list.creationTimeUTC[:-1])).split()[0]
+    for l in lists_top_new:
+        l.creationTimeUTC = str(datetime.datetime.fromisoformat(l.creationTimeUTC[:-1])).split()[0]
 
+    # Pull Top 10 Viewed lists
     lists_top_view = lists_all
     lists_top_view.sort(key=lambda x: int(x.viewCNT), reverse=True)
     if (len(lists_top_view) > 10): lists_top_view = lists_top_view[:10]
 
+    # Pull all Usernames
+    query_columns_users = { Users.id, Users.username }
+    with ArabicUsersDB() as arabic_users_db:
+        users_all = arabic_users_db.session.query(*query_columns_users)    \
+            .filter().all()
+    for l in lists_all:
+        l.creator = [user.username for user in users_all if (user.id == l.creator)][0]
+    
+    # Create list of Lists in alphabet order
+    lists_all.sort(key=lambda x: x.listName, reverse=False)
+    lists_all_alphabet = []
+    for letter in itertools.groupby(lists_all, lambda x: x.listName[0]):
+        lists_with_letter = list(letter[1])
+        lists_all_alphabet.append(lists_with_letter)
+    
+    # Reorganize Data
     lists_all_dict = {"lists_top_new": lists_top_new,
-                    "lists_top_view": lists_top_view}
+                    "lists_top_view": lists_top_view,
+                    "lists_all_alphabet": lists_all_alphabet}
 
     return render_template("lists.all.html",
                                 is_search_submitted = is_search_submitted,
@@ -168,9 +159,9 @@ def lists_handler():
     # Pull List
     query_columns_lists = { Lists }
     with ArabicWordsDB() as arabic_words_db:
-        list = arabic_words_db.session.query(*query_columns_lists)    \
+        list_element = arabic_words_db.session.query(*query_columns_lists)    \
             .filter(Lists.ID == list_id).first()
-    is_list_found = (list is not None)
+    is_list_found = (list_element is not None)
 
     if (not is_search_submitted) or (is_search_submitted and not is_list_found):
         return redirect(f"lists.all.asp?id={list_id}", code=302)
@@ -179,7 +170,7 @@ def lists_handler():
     query_columns_users = { Users }
     with ArabicUsersDB() as arabic_users_db:
         user = arabic_users_db.session.query(*query_columns_users)    \
-            .filter(Users.id == list.creator).first()
+            .filter(Users.id == list_element.creator).first()
 
     # Pull WordsIDs from List
     query_columns_wordsLists = { WordsLists.wordID }
@@ -199,11 +190,12 @@ def lists_handler():
     # Pull 7 most-recently-updated public lists from same creator
     with ArabicWordsDB() as arabic_words_db:
         moreLists = arabic_words_db.session.query(*query_columns_lists)    \
-            .filter(Lists.creator == list.creator).all()
-    moreLists = [list for list in moreLists if int(list.privacy) > 1]
+            .filter(Lists.creator == list_element.creator).all()
+    moreLists = [l for l in moreLists if int(l.privacy) > 1]
     moreLists.sort(key=lambda x: datetime.datetime.strptime(x.lastUpdateUTC, "%Y-%m-%dT%H:%M:%SZ"), reverse=True)
     if (len(moreLists) > 10): moreLists = moreLists[:10]
 
+    # Reorganize Data
     privacy_dict={
         0:["רשימה פרטית","lock"],
         1:["רשימה לבעלי קישור","lock_open"],
@@ -212,18 +204,18 @@ def lists_handler():
     }
 
     list_dict={
-        "privacy_type": privacy_dict[int(list.privacy)][0],
-        "privacy_icon": privacy_dict[int(list.privacy)][1],
+        "privacy_type": privacy_dict[int(list_element.privacy)][0],
+        "privacy_icon": privacy_dict[int(list_element.privacy)][1],
         "listCreatorUsername" : user.username,
-        "str2hebDate_lastUpdateUTC": time_functions.Str2hebDate(list.lastUpdateUTC),
-        "str2hebDate_creationTimeUTC": time_functions.Str2hebDate(list.creationTimeUTC),
+        "str2hebDate_lastUpdateUTC": library.functions.Str2hebDate(list_element.lastUpdateUTC),
+        "str2hebDate_creationTimeUTC": library.functions.Str2hebDate(list_element.creationTimeUTC),
     }
 
     return render_template("lists.html",
                             is_search_submitted = is_search_submitted,
                             is_list_found = is_list_found,
                             list_id = list_id,
-                            list = list,
+                            list_element = list_element,
                             list_dict = list_dict,
                             wordsLists = wordsLists,
                             words = words,
@@ -239,8 +231,8 @@ def sentences_handler():
         sentences = arabic_words_db.session.query(Sentences).all()
 
     return render_template("sentences.html",
-                            sentence_count=sentence_count,
-                            sentences=sentences)
+                            sentence_count = sentence_count,
+                            sentences = sentences)
 
 @app.route("/guide.asp")
 def guide_handler():
@@ -254,7 +246,7 @@ def clock_handler():
 @app.route("/word.asp")
 def word_handler():
     word_id = request.args.get("id", "")
-    label_data_dicts = get_label_data_dicts_containing_word(word_id)
+    label_data_dicts = get_label_data_dicts(word_id)
 
     query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
                     Words.imgLink, Words.partOfSpeach, Words.gender, Words.number}
@@ -268,15 +260,6 @@ def word_handler():
                             word = word,
                             label_data_dicts = label_data_dicts)
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('not_found.html'), 404
-
-@dataclass
-class Image:
-    arabic: str
-    arabicWord: str
-
 @app.route("/about.asp")
 def about_handler():
     return render_template("about.html")
@@ -289,7 +272,6 @@ def games_mem_handler():
 
     images = [image1, image2]
     return render_template("games.mem.html", images=images)
-
 
 @app.route("/")
 def root_handler():
@@ -309,15 +291,18 @@ def root_handler():
     label_data_dicts = get_label_data_dicts()
     search_string = request.args.get("searchString", "")
     search_string_strip = search_string.strip()
-    cleaned_word = get_clean_word(search_string_strip)
+    cleaned_word = library.functions.get_clean_word(search_string_strip)
 
     #DEBUG
-    print("search_string = " + search_string)
-    print("search_string_strip = " + search_string_strip)
-    print("cleaned_word = " + cleaned_word)
+    #print("search_string = " + search_string)
+    #print("search_string_strip = " + search_string_strip)
+    #print("cleaned_word = " + cleaned_word)
 
     query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
-                        Words.imgLink}#, WordsMedia.wordID, WordsMedia.mediaID, Media.id }
+                        Words.imgLink}
+
+    # TODO: Extract MEDIA
+    # WordsMedia.wordID, WordsMedia.mediaID, Media.id
 
     invalid_word_filter = and_(
         Words.show == "True",
@@ -358,7 +343,7 @@ def root_handler():
                                 Words.arabicHebClean == cleaned_word)
                             )).all()
         # CASE 2: "Soundex": Words sound like
-        sound_index = get_sound_index(search_string_strip)
+        sound_index = library.functions.get_sound_index(search_string_strip)
         if (len(sound_index)>0):
             with ArabicWordsDB() as arabic_words_db:
                 sound_like_words = arabic_words_db.session.query(*query_columns) \
@@ -380,10 +365,10 @@ def root_handler():
                                 )).all()
         
         # DEBUG
-        print(exact_match_words)
-        print(sound_like_words)
-        print(letter_like_words)
-        print(search_words)
+        #print(exact_match_words)
+        #print(sound_like_words)
+        #print(letter_like_words)
+        #print(search_words)
         # Remove duplications between lists!
         sound_like_words = [x for x in sound_like_words if x not in set(exact_match_words)]
         letter_like_words = [x for x in letter_like_words if x not in set(exact_match_words + sound_like_words)]
@@ -391,19 +376,17 @@ def root_handler():
   
     return render_template("default.html",
                             search_string = search_string,
-                            label_data_dicts=label_data_dicts,
+                            label_data_dicts = label_data_dicts,
                             is_search_submitted = is_search_submitted,
-                            is_search_string_valid=is_search_string_valid,
-                            is_search_string_short=is_search_string_short,
-                            cleaned_word=cleaned_word,
-                            sound_index=sound_index,
-                            exact_match_words=exact_match_words,
-                            sound_like_words=sound_like_words,
-                            letter_like_words=letter_like_words,
-                            search_words=search_words,
-                            short_words=short_words)
+                            is_search_string_valid = is_search_string_valid,
+                            is_search_string_short = is_search_string_short,
+                            cleaned_word = cleaned_word,
+                            sound_index = sound_index,
+                            exact_match_words = exact_match_words,
+                            sound_like_words = sound_like_words,
+                            letter_like_words = letter_like_words,
+                            search_words = search_words,
+                            short_words = short_words)
 
 if __name__ == '__main__':
-    #app.run(host="192.168.2.109", port=5000, debug=True)
-    #app.run(host="0.0.0.0", port=8081, debug=True)
-    app.run(host="127.0.0.1", port=5431, debug=True)
+    app.run(host=config.config.host_address, port=config.config.port_app, debug=True)

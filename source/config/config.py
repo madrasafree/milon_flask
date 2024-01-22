@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import os
 
 # Database configuration
@@ -10,8 +11,21 @@ class DevConfig:
 class TestConfig:
     API_TOKEN = os.environ.get('MADRASA_SERVER_KEY_SECRET_TEST')
 
-config = {
+env_config = {
     'DEV': DevConfig,
     'TEST': TestConfig,
     'PROD': ProdConfig
 }
+
+# DEVELOPMENT SERVER CONFIGURATION:
+load_dotenv()
+user_name = "postgres"
+password = env_config["DEV"].API_TOKEN   # DEVELOPER MUST ADD PASSWORD TO ENVIRONMENT VARIABLE UNDER "MADRASA_SERVER_KEY_SECRET_DEV"
+# host_address = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
+# host_address = "localhost"                                                        # LOCAL DEVELOPMENT
+host_address = "127.0.0.1"                                                          # LOCAL DEVELOPMENT
+port_db = "5432"
+port_app = "5431"
+#mdb = "arabic_words_db"
+maintenance_database = "postgres"
+db_connection_string = f"postgresql://{user_name}:{password}@{host_address}:{port_db}/{maintenance_database}"

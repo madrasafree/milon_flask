@@ -62,39 +62,29 @@
         <div class="lists listsMine">
         <h2>רשימות שיצרתי</h2>
         {% if (session_userID) %}
-        {#
-        if session("userID") then
-            mySQL = "SELECT * FROM lists WHERE creator="&session("userID")&" ORDER BY listName"
-            res.open mySQL, con
-            if res.EOF then %>
+            {% if (lists_all_dict["lists_mine"]|length == 0) %}
                 <div>עוד לא יצרת אף רשימה.
                 <br/>מעניין מה הכפתור הזה פה למטה עושה</div>
-            
-            else
-                i=0
-                do until res.EOF #}
-                    <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("id")%>';">
-                        <span class="listName"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
-                        <span class="material-icons" style="float:left;">
-                            {#
-                            select case res("privacy")
-                             case 0 lock
-                             case 1 lock_open
-                             case 2 public
-                             case 3 group
-                             end select #}
+            {% else %}
+                {% for list in lists_all_dict["lists_mine"] %}
+                    <div {% if loop.index > 5 %} class="hidden" {% endif %} onclick="location.href='lists.asp?id={{ list.ID }}';">
+                        <span class="listName" title="{{ list.listName }}">{{ list.listName }}</span>
+                        <span class="listData" title="תאריך יצירה">{{ list.creationTimeUTC }}
+                            <span class="material-icons" style="float:left;">
+                                {% if list.privacy == "0" %}    lock
+                                {% elif list.privacy == "1" %}  lock_open
+                                {% elif list.privacy == "2" %}  public
+                                {% elif list.privacy == "3" %}  group
+                                {% endif %}
+                            </span>
                         </span>
                     </div>
-                    {#
-                    res.moveNext
-                    i = i+1
-                loop 
-                if i>5 then #}
+                {% endfor %}
+                {% if lists_all_dict["lists_mine"]|length > 5 %}
                     <button class="showMore listsMine" style="background:#84d45c66;">⇵</button>
-                {# endif
-            endif #}
+                {% endif %}
+            {% endif %}
             <button class="listsMine" style="background:#84d45c66;" onclick="location.href='listsNew.asp';">רשימה חדשה</button>
-            {# res.close #} 
         {% else %}
             <a style="display:block;" href="login.asp?returnTo=lists.all.asp">לחצו כאן כדי להתחבר</a>
         {% endif %}
@@ -103,38 +93,27 @@
         <div class="lists listsSaved">
         <h2>המועדפים שלי</h2>
         {% if (session_userID) %}
-        {#
-        if session("userID") then
-            mySQL = "SELECT * FROM lists INNER JOIN listsUsers ON lists.ID=listsUsers.list WHERE user="&session("userID")&" ORDER BY pos"
-            res.open mySQL, con
-            if res.EOF then #}
+            {% if (lists_all_dict["lists_favorite"]|length == 0) %}
                 <div>עוד לא שמרת אף רשימה</div>
-                {#
-            else
-                i=0
-                do until res.EOF #}
-                    <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("id")%>';">
-                        <span class="listName"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
-                        <span class="material-icons" style="float:left;">
-                            {#
-                            select case res("privacy")
-                             case 0 lock
-                             case 1 lock_open
-                             case 2 public
-                             case 3 group
-                             end select #}
+            {% else %}
+                {% for list in lists_all_dict["lists_mine"] %}
+                    <div {% if loop.index > 5 %} class="hidden" {% endif %} onclick="location.href='lists.asp?id={{ list.ID }}';">
+                        <span class="listName" title="{{ list.listName }}">{{ list.listName }}</span>
+                        <span class="listData" title="תאריך יצירה">{{ list.creationTimeUTC }}
+                            <span class="material-icons" style="float:left;">
+                                {% if list.privacy == "0" %}    lock
+                                {% elif list.privacy == "1" %}  lock_open
+                                {% elif list.privacy == "2" %}  public
+                                {% elif list.privacy == "3" %}  group
+                                {% endif %}
+                            </span>
                         </span>
                     </div>
-                    {#
-                    res.moveNext
-                    i = i+1
-                loop
-                if i>5 then #}
+                {% endfor %}
+                {% if lists_all_dict["lists_favorite"]|length > 5 %}
                     <button class="showMore listsSaved" style="background:#84d45c66;">⇵</button>
-                    {#
-                end if
-            end if
-            res.close #} 
+                {% endif %}
+            {% endif %}
         {% else %}
             <a style="display:block;" href="login.asp?returnTo=lists.all.asp">לחצו כאן כדי להתחבר</a>
         {% endif %}
@@ -146,7 +125,7 @@
             {% for list in lists_all_dict["lists_top_new"] %}
                 <div {% if loop.index > 5 %} class="hidden" {% endif %} onclick="location.href='lists.asp?id={{ list.ID }}';">
                     <span class="listName" title="{{ list.listName }}">{{ list.listName }}</span>
-                    <span class="listData"> {{ list.creationTimeUTC }}
+                    <span class="listData" title="תאריך יצירה">{{ list.creationTimeUTC }}
                         <span class="material-icons" style="float:left;">
                             {% if list.privacy == "0" %}    lock
                             {% elif list.privacy == "1" %}  lock_open
@@ -157,7 +136,9 @@
                     </span>
                 </div>
             {% endfor %}
+            {% if lists_all_dict["lists_top_new"]|length > 5 %}
             <button class="showMore listsNew" style="background:#fb936a66;">⇵</button>
+            {% endif %}
         </div>
 
         <div class="lists listsPop">
@@ -176,15 +157,18 @@
                     </span>
                 </div>
             {% endfor %}
+            {% if lists_all_dict["lists_top_view"]|length > 5 %}
             <button class="showMore listsPop" style="background:#fb936a66;">⇵</button>
+            {% endif %}
         </div>
-
+    </div>
 {% if (session_userID == 1 or session_userID == 73) and session_userID == creatorID %}
-
+{#
 dim i
 mySQL = "SELECT count(id) FROM lists"
 res.open mySQL, con 
 #}
+{#
 <h3>אינדקס רשימות אישיות</h3>
 <div style="max-width:600px; margin:0 auto; text-align:center;">
     <p>ישנן כרגע <%=res(0)%> רשימות</p>
@@ -195,57 +179,43 @@ res.open mySQL, con
     <div id="listSelect">
     </div>
 </div>
+#}
 {# endif #}
 
 {% endif %}
 
-{#
-    dim firstLtr
-    firstLtr=""
-    i=0
-    mySQL = "SELECT * FROM lists LEFT JOIN (SELECT * FROM [users] IN '"&Server.MapPath("App_Data/arabicUsers.mdb")&"') AS T ON lists.creator=T.ID WHERE privacy > 1 ORDER BY TRIM(listName)"
-    res.open mySQL, con 
-    Do until res.EOF
-        if ucase(left(trim(res("listName")),1)) <> ucase(firstLtr) then 
-            if firstLtr<>"" then
-                if i>5 then %>
-#}
-                    <button class="showMore">⇵</button>
-                    {# endif #}
-                </div>
-                {# endif #}
-            <div class="lists"><h2><%=left(trim(res("listName")),1)%></h2>
-            {# i=0 #}
-        {# endif #}
-        <div<%if i>4 then%> class="hidden"<%end if%> onclick="location.href='lists.asp?id=<%=res("lists.ID")%>'">
-            <span class="listName" title="<%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%>"><%=Replace(res("listName"),chrw(&H0651),chrw(&H0598))%></span>
-            <span class="listData"><%=res("userName")%>
-                <span class="material-icons" style="float:left;">
-                    {#
-                    select case res("privacy")
-                        case 0 %>lock<%
-                        case 1 %>lock_open<%
-                        case 2 %>public<%
-                        case 3 %>group<%
-                        end select %>
-                    #}
+{% for letter in lists_all_dict["lists_all_alphabet"] %}
+    {% if (loop.index0 % 2 == 0) %}
+    <div>
+    {% endif %}
+        <div class="lists X">
+            <h2>{{ letter[0].listName[0] }}</h2>
+            {% for list in letter %}
+            <div {% if loop.index > 5 %} class="hidden" {% endif %} onclick="location.href='lists.asp?id={{ list.ID }}';">
+                <span class="listName" title="{{ list.listName }}">{{ list.listName }}</span>
+                <span class="listData" title="שם משתמש">{{ list.creator }}
+                    <span class="material-icons" style="float:left;">
+                        {% if list.privacy == "0" %}    lock
+                        {% elif list.privacy == "1" %}  lock_open
+                        {% elif list.privacy == "2" %}  public
+                        {% elif list.privacy == "3" %}  group
+                        {% endif %}
+                    </span>
                 </span>
-            </span>
+            </div>
+            {% endfor %}
+            {% if letter|length > 5 %}
+            <button class="showMore">⇵</button>
+            {% endif %}
         </div>
-{#
-        i = i + 1
-        firstLtr = left(trim(res("listName")),1)
-        res.moveNext
-    Loop
-res.close 
-endTime = timer()
-durationMs = Int((endTime - startTime)*1000)
-'closeDB
-closeDbLogger "arabicWords","C","lists.all.asp","single",durationMs,""
-#}
+    {% if (loop.index0 % 2 == 1) %}
+    </div>
+    {% endif %}
+{% endfor %}
+    {% if (lists_all_dict["lists_all_alphabet"]|length % 2 == 1) %}
+    </div>
+    {% endif %}
 </div>
-</div>
-
 
 <script>
     var listStr,lists,listsFltr,domBuilder
