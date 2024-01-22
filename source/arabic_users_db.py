@@ -1,37 +1,17 @@
-import os
-from dotenv import load_dotenv
-from pathlib import Path
-import json
-from config.config import config
+import config.config
 
-from sqlalchemy import Column, create_engine, inspect, UniqueConstraint, ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint
+from sqlalchemy import Column, create_engine, PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import TEXT, TIMESTAMP, BOOLEAN, INTEGER
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-
 class RelationTypes:
     SINGULAR_PLURAL = 3
     MALE_FEMALE = 4
 
-
 Base = declarative_base()
-
 PUBLIC_SCHEMA = {"schema": "public"}
-
-
-# DEVELOPMENT SERVER CONFIGURATION:
-load_dotenv()
-user_name = "postgres"
-password = config["DEV"].API_TOKEN   # TODO: ADD PASSWORD TO ENVIRONMENT VARIABLE UNDER "MADRASA_SERVER_KEY_SECRET_DEV"
-# host_address = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
-# host_address = "localhost"                                                        # LOCAL DEVELOPMENT
-host_address = "127.0.0.1"                                                          # LOCAL DEVELOPMENT
-port = "5432"
-#mdb = "arabic_words_db"
-maintenance_database = "postgres"
-db_connection_string = f"postgresql://{user_name}:{password}@{host_address}:{port}/{maintenance_database}"
 
 class ArabicUsersDB:
     def __init__(self):
@@ -39,7 +19,7 @@ class ArabicUsersDB:
         self.engine: Engine = ...
 
     def __enter__(self):
-        self.engine = create_engine(db_connection_string)
+        self.engine = create_engine(config.config.db_connection_string)
         Session = sessionmaker(expire_on_commit=False)
         self.session = Session(bind=self.engine)
         return self
@@ -135,7 +115,6 @@ class QueryOptions:
     def order_by(*args):
         pass
 
-
 class Filterable:
     @staticmethod
     def filter(*args, **kwargs) -> QueryOptions:
@@ -144,7 +123,6 @@ class Filterable:
     @staticmethod
     def all():
         pass
-
 
 class AbstractSession(Session):
     @staticmethod

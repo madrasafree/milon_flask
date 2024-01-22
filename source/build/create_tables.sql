@@ -3,7 +3,7 @@
 
 
 --------------------------
---- ArabicWords TABLES ---
+--- arabicWords TABLES ---
 --------------------------
 
 create table if not exists "history"
@@ -206,7 +206,7 @@ create table if not exists "wordsShort"
 );
 
 --------------------------
---- ArabicUsers TABLES ---
+--- arabicUsers TABLES ---
 --------------------------
 
 create table if not exists "allowEdit"
@@ -272,3 +272,158 @@ create table if not exists "usersWordsFollow"
 	"userID"  text,
 	"wordID"  text
 );
+
+----------------------------
+----- arabicSearch TABLES --
+----------------------------
+--
+--create table if not exists "latestSearched"
+--(
+--	"searchTime"  text,
+--	"searchID"  text,
+--);
+--
+--create table if not exists "log"
+--(
+--	"ID"  text,
+--	"opType"  text,
+--	"afDB"  text,
+--	"afPage"  text,
+--	"opNum"  text,
+--	"userIP"  text,
+--	"opTimestamp"  text,
+--	"durationMs"  text,
+--	"sStr"  text,
+--);
+--
+--create table if not exists "wordsSearched"
+--(
+--	"id"  text,
+--	"typed"  text,
+--	"searchCount"  text,
+--	"translated"  text,
+--	"result"  text,
+--);
+--
+----------------------------
+---- arabicManager TABLES --
+----------------------------
+--
+--create table if not exists "goals"
+--(
+--	"ID"  text,
+--	"title"  text,
+--);
+--
+--create table if not exists "labels"
+--(
+--	"ID"  text,
+--	"label"  text,
+--);
+--
+--create table if not exists "log"
+--(
+--	"ID"  text,
+--	"opType"  text,
+--	"afDB"  text,
+--	"afPage"  text,
+--	"opNum"  text,
+--	"userIP"  text,
+--	"opTimestamp"  text,
+--	"durationMs"  text,
+--	"sStr"  text,
+--);
+--
+--create table if not exists "projects"
+--(
+--	"ID"  text,
+--	"title"  text,
+--	"goal"  text,
+--);
+--
+--create table if not exists "subTasks"
+--(
+--	"ID"  text,
+--	"title"  text,
+--	"task"  text,
+--	"isDone"  text,
+--	"place"  text,
+--);
+--
+--create table if not exists "tasks"
+--(
+--	"ID"  text,
+--	"private"  text,
+--	"title"  text,
+--	"project"  text,
+--	"status"  text,
+--	"priority"  text,
+--	"type"  text,
+--	"section"  text,
+--	"img"  text,
+--	"notes"  text,
+--	"dateStart"  text,
+--	"dateEdit"  text,
+--	"dateEnd"  text,
+--);
+--
+--create table if not exists "tasksLabels"
+--(
+--	"task"  text,
+--	"label"  text,
+--);
+--
+--create table if not exists "tasksVoting"
+--(
+--	"taskID"  text,
+--	"userID"  text,
+--);
+--
+----------------------------
+---- arabicLogs TABLES --
+----------------------------
+--
+--create table if not exists "durations"
+--(
+--	"ID"  text,
+--	"opType"  text,
+--	"afDB"  text,
+--	"afPage"  text,
+--	"opNum"  text,
+--	"userIP"  text,
+--	"opTimestamp"  text,
+--	"durationMs"  text,
+--	"sStr"  text,
+--);
+--
+--create table if not exists "monitors"
+--(
+--	"mID"  text,
+--	"status"  text,
+--	"actionUTC"  text,
+--);
+--
+----------------------------
+---- arabicSandbox TABLES --
+----------------------------
+--
+--create table if not exists "log"
+--(
+--	"ID"  text,
+--	"opType"  text,
+--	"afDB"  text,
+--	"afPage"  text,
+--	"opNum"  text,
+--	"userIP"  text,
+--	"opTimestamp"  text,
+--	"durationMs"  text,
+--	"sStr"  text,
+--);
+--
+--create table if not exists "timez"
+--(
+--	"ID"  text,
+--	"inputTimeUTC"  text,
+--	"sayWhat"  text,
+--);
+

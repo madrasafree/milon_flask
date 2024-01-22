@@ -1,37 +1,17 @@
-import os
-from dotenv import load_dotenv
-from pathlib import Path
-import json
-from config.config import config
+import config.config
 
-from sqlalchemy import Column, create_engine, inspect, UniqueConstraint, ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint
+from sqlalchemy import Column, create_engine, PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import TEXT, TIMESTAMP, BOOLEAN, INTEGER
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-
 class RelationTypes:
     SINGULAR_PLURAL = 3
     MALE_FEMALE = 4
 
-
 Base = declarative_base()
-
 PUBLIC_SCHEMA = {"schema": "public"}
-
-
-# DEVELOPMENT SERVER CONFIGURATION:
-load_dotenv()
-user_name = "postgres"
-password = config["DEV"].API_TOKEN   # TODO: ADD PASSWORD TO ENVIRONMENT VARIABLE UNDER "MADRASA_SERVER_KEY_SECRET_DEV"
-# host_address = "arabic-words-db-server.c5cx9bfmz05i.us-east-1.rds.amazonaws.com"  # REMOTE PRODUCTION
-# host_address = "localhost"                                                        # LOCAL DEVELOPMENT
-host_address = "127.0.0.1"                                                          # LOCAL DEVELOPMENT
-port = "5432"
-#mdb = "arabic_words_db"
-maintenance_database = "postgres"
-db_connection_string = f"postgresql://{user_name}:{password}@{host_address}:{port}/{maintenance_database}"
 
 class ArabicWordsDB:
     def __init__(self):
@@ -39,7 +19,7 @@ class ArabicWordsDB:
         self.engine: Engine = ...
 
     def __enter__(self):
-        self.engine = create_engine(db_connection_string)
+        self.engine = create_engine(config.config.db_connection_string)
         Session = sessionmaker(expire_on_commit=False)
         self.session = Session(bind=self.engine)
         return self
@@ -50,7 +30,6 @@ class ArabicWordsDB:
 
         self.session.close()
         self.engine.dispose()
-
 
 class History(Base):
     __tablename__ = "history"
@@ -103,7 +82,6 @@ class History(Base):
     labelsOld = Column(TEXT)
     labelsNew = Column(TEXT)
 
-
 class Labels(Base):
     __tablename__ = "labels"
     __table_args__ = PUBLIC_SCHEMA
@@ -113,7 +91,6 @@ class Labels(Base):
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
 
 class Lists(Base):
     __tablename__ = "lists"
@@ -128,14 +105,12 @@ class Lists(Base):
     privacy = Column(TEXT)
     type = Column(TEXT)
 
-
 class ListsUsers(Base):
     __tablename__ = "listsUsers"
     __table_args__ = PUBLIC_SCHEMA
     list = Column(TEXT, primary_key=True)
     user = Column(TEXT)
     pos = Column(TEXT)
-
 
 class Log(Base):
     __tablename__ = "log"
@@ -149,7 +124,6 @@ class Log(Base):
     opTimestamp = Column(TEXT)
     durationMs = Column(TEXT)
     sStr = Column(TEXT)
-
 
 class Media(Base):
     __tablename__ = "media"
@@ -167,7 +141,6 @@ class Media(Base):
     creationTimeUTC = Column(TEXT)
     lastUpdateUTC = Column(TEXT)
 
-
 class Sentences(Base):
     __tablename__ = "sentences"
     __table_args__ = PUBLIC_SCHEMA
@@ -183,7 +156,6 @@ class Sentences(Base):
     info = Column(TEXT)
     creator = Column(TEXT)
     creationTimeUTC = Column(TEXT)
-
 
 class Words(Base):
     __tablename__ = "words"
@@ -222,7 +194,6 @@ class Words(Base):
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-
 class WordsLabels(Base):
     __tablename__ = "wordsLabels"
     #__table_args__ = PUBLIC_SCHEMA
@@ -231,7 +202,6 @@ class WordsLabels(Base):
     __table_args__ = (
         PrimaryKeyConstraint(wordID, labelID),
     )
-
 
 class WordsLists(Base):
     __tablename__ = "wordsLists"
@@ -243,13 +213,11 @@ class WordsLists(Base):
         PrimaryKeyConstraint(wordID, listID),
     )
     
-    
 class WordsMedia(Base):
     __tablename__ = "wordsMedia"
     __table_args__ = PUBLIC_SCHEMA
     wordID = Column(TEXT, primary_key=True)
     mediaID = Column(TEXT)
-
 
 class WordsRelations(Base):
     __tablename__ = "wordsRelations"
@@ -257,7 +225,6 @@ class WordsRelations(Base):
     word1 = Column(TEXT, primary_key=True)
     word2 = Column(TEXT)
     relationType = Column(TEXT)
-
 
 class WordsSentences(Base):
     __tablename__ = "wordsSentences"
@@ -268,14 +235,12 @@ class WordsSentences(Base):
     relevance = Column(TEXT)
     merge = Column(TEXT)
 
-
 class WordsShort(Base):
     __tablename__ = "wordsShort"
     __table_args__ = PUBLIC_SCHEMA
     ID = Column(TEXT, primary_key=True)
     sStr = Column(TEXT)
     wordID = Column(TEXT)
-
 
 class QueryOptions:
     @staticmethod
@@ -298,7 +263,6 @@ class QueryOptions:
     def order_by(*args):
         pass
 
-
 class Filterable:
     @staticmethod
     def filter(*args, **kwargs) -> QueryOptions:
@@ -307,7 +271,6 @@ class Filterable:
     @staticmethod
     def all():
         pass
-
 
 class AbstractSession(Session):
     @staticmethod

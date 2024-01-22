@@ -8,7 +8,7 @@ from sqlalchemy import select, func, and_, or_, not_
 from arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
 from arabic_users_db import ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow
 from includes_utils import get_top_variables, get_trailer_variables
-from config.config import config
+import config.config
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -427,4 +427,4 @@ def root_handler():
 if __name__ == '__main__':
     #app.run(host="192.168.2.109", port=5000, debug=True)
     #app.run(host="0.0.0.0", port=8081, debug=True)
-    app.run(host="127.0.0.1", port=5431, debug=True)
+    app.run(host=config.config.host_address, port=config.config.port_app, debug=True)
