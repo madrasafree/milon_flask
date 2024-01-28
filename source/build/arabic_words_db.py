@@ -224,10 +224,13 @@ class WordsMedia(Base):
 
 class WordsRelations(Base):
     __tablename__ = "wordsRelations"
-    __table_args__ = PUBLIC_SCHEMA
-    word1 = Column(TEXT, primary_key=True)
+    #__table_args__ = PUBLIC_SCHEMA
+    word1 = Column(TEXT)
     word2 = Column(TEXT)
     relationType = Column(TEXT)
+    __table_args__ = (
+        PrimaryKeyConstraint(word1, word2),
+    )
 
 class WordsSentences(Base):
     __tablename__ = "wordsSentences"

@@ -343,6 +343,23 @@
             {% for media in exact_match_words_media_dict[word.id] %}
                 {{ word_media(media) }}
             {% endfor %}
+
+            {% for word in exact_match_words_plural_dict[word.id] %}
+                <fieldset onclick="location.href='word.asp?id={{ word.id }}';">
+                    <legend>רבים</legend>
+                    <div id="related">
+                        {{ word_result(word) }}
+                    </div>
+                </fieldset>
+            {% endfor %}
+            {% for word in exact_match_words_singular_dict[word.id] %}
+                <fieldset onclick="location.href='word.asp?id={{ word.id }}';">
+                    <legend>יחיד</legend>
+                    <div id="related">
+                        {{ word_result(word) }}
+                    </div>
+                </fieldset>
+            {% endfor %}
             
             {{ word_img(word) }}
             

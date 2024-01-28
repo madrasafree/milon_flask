@@ -48,7 +48,7 @@ table_names_arabicWords = "history labels lists listsUsers log media sentences w
               "wordsRelations wordsSentences wordsShort".split()
 table_names_arabicUsers = "allowEdit log loginLog users usersWordsFollow".split()
 
-columns_to_load_filter_arabicWords = ["wordsLists"] #"words", "wordsMedia", "media", "wordsLabels", "labels"]
+columns_to_load_filter_arabicWords = ["wordsRelations"] #"wordsLists" #"words", "wordsMedia", "media", "wordsLabels", "labels"]
 columns_to_load_filter_arabicUsers = ["users"]
 
 

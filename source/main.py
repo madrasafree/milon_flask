@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from build.arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, WordsShort, Sentences, WordsMedia, Media, Lists, ListsUsers, WordsLists
+from build.arabic_words_db import ArabicWordsDB, History, Labels, Lists, ListsUsers, Log, Media, Sentences, Words, WordsLabels, WordsLists, WordsMedia, WordsRelations, WordsSentences, WordsShort
 from build.arabic_users_db import ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow
 import config.config
 import datetime
@@ -382,13 +382,25 @@ def root_handler():
         
         exact_match_words_media_dict = {}
         for word in exact_match_words:
-            print(word.id)
             media_ids = [wordMedia.mediaID for wordMedia in wordsMedia if wordMedia.wordID == word.id]
-            print(media_ids)
             medias = [m for m in media if m.id in media_ids]
-            for m in medias: print(m.id)
             exact_match_words_media_dict[word.id] = medias
-        print(exact_match_words_media_dict)
+        
+        # Extract plural for each exact_match_word
+        query_columns_wordsRelations = { WordsRelations.word1, WordsRelations.word2, WordsRelations.relationType }
+        with ArabicWordsDB() as arabic_words_db:
+            wordsRelations = arabic_words_db.session.query(*query_columns_wordsRelations).filter(WordsRelations.relationType == "3").all()
+        
+        exact_match_words_plural_dict = {}
+        exact_match_words_singular_dict = {}
+        for word in exact_match_words:
+            word_ids_plural = [w.word2 for w in wordsRelations if (w.word1 == word.id)]
+            word_ids_singular = [w.word1 for w in wordsRelations if (w.word2 == word.id)]
+            with ArabicWordsDB() as arabic_words_db:
+                words_plural = arabic_words_db.session.query(*query_columns).filter(Words.id.in_(word_ids_plural)).all()
+                words_singular = arabic_words_db.session.query(*query_columns).filter(Words.id.in_(word_ids_singular)).all()
+            exact_match_words_plural_dict[word.id] = words_plural
+            exact_match_words_singular_dict[word.id] = words_singular
 
     return render_template("default.html",
                             search_string = search_string,
@@ -403,7 +415,10 @@ def root_handler():
                             letter_like_words = letter_like_words,
                             search_words = search_words,
                             short_words = short_words,
-                            exact_match_words_media_dict = exact_match_words_media_dict)
+                            exact_match_words_media_dict = exact_match_words_media_dict,
+                            exact_match_words_plural_dict = exact_match_words_plural_dict,
+                            exact_match_words_singular_dict = exact_match_words_singular_dict)
+
 
 if __name__ == '__main__':
     app.run(host=config.config.host_address, port=config.config.port_app, debug=True)

@@ -2,14 +2,33 @@
 
 <div class="media">
   {% if (media.mType == "1") %}
-  {{ "youtube" }}
+  <iframe class="youTube" src="//www.youtube.com/embed/{{ media.mLink }}?rel=0&theme=light" allowfullscreen style="border:0;"></iframe>
   {% elif (media.mType == "21") %}
-  {{ "clyp.it" }}
+  <iframe class="clyp" width="100%" height="160" src="https://clyp.it/{{ media.mLink }}/widget" frameborder="0"></iframe>
   {% elif (media.mType == "22") %}
-  {{ "soundcloud" }}
+  <iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/{{ media.mLink }}&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"></iframe>
   {% elif (media.mType == "23") %}
-  {{ "local ogg" }}
+  <audio id="audioPlayer">
+    <source src="audio/{{ media.mLink }}" type="audio/ogg">
+    הדפדפן שלך לא תומך באלמנט האודיו.
+</audio>
+<div style="background:white; border:1px solid #E4E5E5; padding:5px;">
+    <span class="material-icons" style="font-size:50px;cursor:pointer;" onclick="document.getElementById('audioPlayer').play()">play_circle_outline</span>
+</div>  
   {% endif %}
+  <div style="font-size:small;">תודה ל: 
+  {% if ( media.creditLink|length > 0) %}
+    <a href="{{ media.credit }}" target="_new">
+    {% if media.credit == "ערביט" %}
+      <img src="img/site/links.arabit.png" alt="ערביט" title="לחצו לדף המילה בפרויקט ערביט"/>
+    {% else %}
+      {{ media.credit }}
+    {% endif %}
+    </a>
+  {% else %}
+    {{ media.credit }}
+  {% endif %}
+  </div>
 </div>
 
 {%- endmacro %}
