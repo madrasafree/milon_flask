@@ -215,9 +215,12 @@ class WordsLists(Base):
     
 class WordsMedia(Base):
     __tablename__ = "wordsMedia"
-    __table_args__ = PUBLIC_SCHEMA
-    wordID = Column(TEXT, primary_key=True)
+    #__table_args__ = PUBLIC_SCHEMA
+    wordID = Column(TEXT)
     mediaID = Column(TEXT)
+    __table_args__ = (
+        PrimaryKeyConstraint(wordID, mediaID),
+    )
 
 class WordsRelations(Base):
     __tablename__ = "wordsRelations"

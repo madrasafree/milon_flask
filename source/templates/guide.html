@@ -5,6 +5,13 @@
 	<meta id="Description" content="כמה מילים אודות המילון ואיך הוא עובד" />
     {% include 'includes/header.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/guide.css') }}" />
+    <script>
+        $(document).ready(function(){
+            // HIDES / UNHIDES
+            $(".hidden").hide();
+            $("#message").hide();
+        });
+    </script>
 </head>
 <body>
 {% include 'includes/top.html' %}

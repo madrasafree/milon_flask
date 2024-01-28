@@ -299,10 +299,8 @@ def root_handler():
     #print("cleaned_word = " + cleaned_word)
 
     query_columns = { Words.id, Words.show, Words.arabic, Words.arabicWord, Words.hebrewTranslation, Words.hebrewDef, Words.hebrewClean, Words.arabicClean, Words.arabicHebClean, Words.pronunciation,  \
-                        Words.imgLink}
-
-    # TODO: Extract MEDIA
-    # WordsMedia.wordID, WordsMedia.mediaID, Media.id
+                        Words.imgLink, Words.imgCredit }
+    query_columns_exact = query_columns | { Words.partOfSpeach, Words.gender, Words.number }
 
     invalid_word_filter = and_(
         Words.show == "True",
@@ -336,7 +334,7 @@ def root_handler():
     if (len(cleaned_word)>1):
         # CASE 1: "Identical": Words exactly as searched
         with ArabicWordsDB() as arabic_words_db:
-            exact_match_words = arabic_words_db.session.query(*query_columns)    \
+            exact_match_words = arabic_words_db.session.query(*query_columns_exact)    \
                 .filter(and_(invalid_word_filter,       # TODO: FIX!
                             or_(Words.hebrewClean == cleaned_word,
                                 Words.arabicClean == cleaned_word,
@@ -374,6 +372,24 @@ def root_handler():
         letter_like_words = [x for x in letter_like_words if x not in set(exact_match_words + sound_like_words)]
         search_words = [x for x in search_words if x not in set(exact_match_words + sound_like_words + letter_like_words)]
   
+        # Extract media for each exact_match_word
+        query_columns_wordsMedia = { WordsMedia.wordID, WordsMedia.mediaID }
+        query_columns_media = { Media.id, Media.mType, Media.mLink, Media.description, Media.credit, Media.creditLink, Media.speaker, Media.uploader, Media.school, Media.creationTime, Media.creationTimeUTC }
+        with ArabicWordsDB() as arabic_words_db:
+            wordsMedia = arabic_words_db.session.query(*query_columns_wordsMedia).filter().all()
+        with ArabicWordsDB() as arabic_words_db:
+            media = arabic_words_db.session.query(*query_columns_media).filter().all()
+        
+        exact_match_words_media_dict = {}
+        for word in exact_match_words:
+            print(word.id)
+            media_ids = [wordMedia.mediaID for wordMedia in wordsMedia if wordMedia.wordID == word.id]
+            print(media_ids)
+            medias = [m for m in media if m.id in media_ids]
+            for m in medias: print(m.id)
+            exact_match_words_media_dict[word.id] = medias
+        print(exact_match_words_media_dict)
+
     return render_template("default.html",
                             search_string = search_string,
                             label_data_dicts = label_data_dicts,
@@ -386,7 +402,8 @@ def root_handler():
                             sound_like_words = sound_like_words,
                             letter_like_words = letter_like_words,
                             search_words = search_words,
-                            short_words = short_words)
+                            short_words = short_words,
+                            exact_match_words_media_dict = exact_match_words_media_dict)
 
 if __name__ == '__main__':
     app.run(host=config.config.host_address, port=config.config.port_app, debug=True)

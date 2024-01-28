@@ -8,6 +8,7 @@
 <head>
     {% include 'includes/header.html' %}
     {% from "includes/word_result_macro.html" import word_result %}
+    {% from "includes/word_media_macro.html" import word_media, word_img %}
     <title>מילון ערבית מדוברת - לדוברי עברית</title>
     <meta name="Description" content="המילון לערבית מדוברת (לדוברי עברית) הוא שירות חינמי שנועד לעזור לקהילת לומדי הערבית המדוברת" />
     <meta name="Keywords" content="מילון עברי ערבי, תרגום עברית ערבית, מילון ערבי עברי, תרגום מעברית לערבית, תרגום ערבית עברית, מתרגם עברית ערבית" /> <!-- since 2021-06 -->
@@ -338,8 +339,15 @@
             <div class="exact">
                 {{ word_result(word) }}
             </div>
+            
+            {% for media in exact_match_words_media_dict[word.id] %}
+                {{ word_media(media) }}
+            {% endfor %}
+            
+            {{ word_img(word) }}
+            
         {% endfor %}
-        
+
         <h2 id='cnt2'>כמו מה שחיפשתם<span style='font-size:.7em; float:left; padding-left:4px;'>{{sound_index}}</span></h2>
         {% for word in sound_like_words %}
             <div>

@@ -1,0 +1,29 @@
+{% macro word_media(media) %}
+
+<div class="media">
+  {% if (media.mType == "1") %}
+  {{ "youtube" }}
+  {% elif (media.mType == "21") %}
+  {{ "clyp.it" }}
+  {% elif (media.mType == "22") %}
+  {{ "soundcloud" }}
+  {% elif (media.mType == "23") %}
+  {{ "local ogg" }}
+  {% endif %}
+</div>
+
+{%- endmacro %}
+
+{% macro word_img(word) %}
+
+{% if (word.imgLink != "") and (word.imgLink != "None") %}
+<div class="thumb">
+  <img src="{{ word.imgLink }}"/>
+  {% if (word.imgCredit != "") and (word.imgCredit != "None") %}
+  <div class="credit">{{ word.imgCredit }}</div>
+  {% endif %}
+</div>
+{% endif %}
+
+{%- endmacro %}
+
