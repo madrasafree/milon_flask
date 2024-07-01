@@ -3,6 +3,8 @@
 
 Welcome to the Madrasa community dictionary repository!
 
+This project is an initiative by Madrasa to migrate the technology of the Spoken Arabic Dictionary from ASP Classic to Python Flask.
+
 ## Compilation Instructions (DEV Mode)
 
 ### Step 1: Install Python
