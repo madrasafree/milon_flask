@@ -9,7 +9,6 @@ Welcome to the Madrasa community dictionary repository!
 https://docs.docker.com/get-docker/
 https://docs.docker.com/compose/install/
 
-
 ### Step 2: Clone the Repository
 Clone the repository locally from GitHub:
 ```bash
