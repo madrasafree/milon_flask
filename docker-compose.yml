@@ -1,8 +1,8 @@
-version: '3'
-
 services:
   milon:
     build: .
+    environment:
+      MADRASA_SERVER_KEY_SECRET_DEV: "postgres"
     ports:
       - "5431:5431"
     volumes:
@@ -18,7 +18,6 @@ services:
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_USER: "postgres"
       POSTGRES_DB: "postgres"
-      MADRASA_SERVER_KEY_SECRET_DEV: ${POSTGRES_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
