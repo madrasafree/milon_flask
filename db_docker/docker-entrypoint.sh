@@ -9,8 +9,18 @@ until pg_isready; do
     sleep 2
 done
 
-# Create database schemas and load data from dumps
-/load_dumps.sh
+schema_exists=$(psql -h localhost -p 5432 -U postgres -Atc \
+"SELECT 1 FROM information_schema.schemata WHERE schema_name = 'public';")
+
+# Trim whitespace
+schema_exists=$(echo $schema_exists | xargs)
+
+if [ "$schema_exists" = "1" ]; then
+    echo "Schema exists. Skipping schema loading."
+else
+    echo "Schema does not exist. Loading dumps..."
+    /load_dumps.sh
+fi
 
 # Keep the container running by waiting for the original entrypoint script
 wait
