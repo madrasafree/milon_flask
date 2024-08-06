@@ -14,6 +14,11 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 class Image:
     arabic: str
     arabicWord: str
+    pronunciation: str
+    hebrewTranslation: str
+    hebrewDef: str
+    imgLink: str
+    imgCredit: str
 
 def get_label_data_dicts(word_id = None):
     with ArabicWordsDB() as arabic_words_db:
@@ -266,14 +271,27 @@ def about_handler():
 
 @app.route("/games.mem.asp")
 def games_mem_handler():
-
-    image1 = Image("cat", "biss")
-    image2 = Image("school", "madrasa")
-
-    images = [image1, image2]
-    return render_template("games.mem.html", images=images)
+    with ArabicWordsDB() as arabic_words_db:
+        results = arabic_words_db.session.query(Words).filter(
+            Words.imgLink.isnot(None),
+            Words.show == "1",
+            Words.status == "1"
+        ).order_by(func.random()).limit(20).all()
+        images = [
+            Image(
+                arabic=result.arabic,
+                arabicWord=result.arabicWord,
+                pronunciation=result.pronunciation,
+                hebrewTranslation=result.hebrewTranslation,
+                hebrewDef=result.hebrewDef,
+                imgLink=result.imgLink,
+                imgCredit=result.imgCredit
+            ) for result in results
+        ]
+        return render_template("games.mem.html", images=images)
 
 @app.route("/")
+@app.route("/default.asp")
 def root_handler():
     # INITIALIZE VARIABLES
     is_search_submitted = True

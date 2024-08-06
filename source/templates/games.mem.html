@@ -124,18 +124,18 @@
 					{{ image.arabicWord }}
 				</div>
 	            <div class="eng" style="text-align:left;">
-					res("pronunciation")
+					{{  image.pronunciation  }}
 				</div>
 	        </div>
             <div>
-	            <div class="heb" style="text-align:right;padding-bottom:3px;">res("hebrewTranslation")
+	            <div class="heb" style="text-align:right;padding-bottom:3px;">{{  image.hebrewTranslation  }}
 
-					{% if 'res.hebrewDef' %}
-					  <span style="font-size:small;">res("hebrewDef")</span>
+					{% if image.hebrewDef %}
+					  <span style="font-size:small;">{{ image.hebrewDef }}</span>
 				    {% endif %}
 
 	            </div>
-            	<img class="img" src="res('imgLink')" alt="res('hebrewTranslation')" title="res('imgCredit')" style="max-width:480px;" />
+				<img class="img" src="{{ image.imgLink }}" alt="{{ image.hebrewTranslation }}" title="{{ image.imgCredit }}" style="max-width:480px;" />
             </div>
         </div>
 		{% endfor %}
