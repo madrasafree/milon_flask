@@ -19,7 +19,7 @@ class ArabicUsersDB:
         self.engine: Engine = ...
 
     def __enter__(self):
-        self.engine = create_engine(config.config.db_connection_string)
+        self.engine = create_engine(f"{config.config.db_base_connection_string}/arabicUsers")
         Session = sessionmaker(expire_on_commit=False)
         self.session = Session(bind=self.engine)
         return self
