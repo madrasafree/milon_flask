@@ -3,7 +3,7 @@
 <div class="result" onclick="location.href='word.asp?id={{word.id}}';">
   <div class="heb" style="position: relative;">
     <a href="word.asp?id={{word.id}}">{{word.hebrewTranslation}}</a>
-      {% if (word.hebrewDef != "") and (word.hebrewDef != "None") %}
+      {% if (word.hebrewDef != "") and (word.hebrewDef != "None") and (word.hebrewDef is not none) %}
         <span class="def">({{word.hebrewDef.strip()}})
       {% endif %}
         <span class="icons">
