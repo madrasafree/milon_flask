@@ -189,7 +189,7 @@ def lists_handler():
     for wordID in wordsLists:
         with ArabicWordsDB() as arabic_words_db:
             word = arabic_words_db.session.query(*query_columns_words)    \
-                .filter(Words.id == wordID).first()
+                .filter(Words.id == wordID[0]).first()
         words.append(word)
 
     # Pull 7 most-recently-updated public lists from same creator
