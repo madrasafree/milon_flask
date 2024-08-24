@@ -5,10 +5,22 @@ import config.config
 import datetime
 import itertools
 import library.functions
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template, flash
 from sqlalchemy import select, func, and_, or_, not_
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = 'your_secret_key'
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(id):
+    with ArabicUsersDB() as arabic_users_db:
+        user = arabic_users_db.session.query(Users) \
+            .filter(Users.id == id).first()
+    return user
+
 
 @dataclass
 class Image:
@@ -136,7 +148,11 @@ def lists_all_handler():
     with ArabicUsersDB() as arabic_users_db:
         users_all = arabic_users_db.session.query(*query_columns_users)    \
             .filter().all()
+    lists_mine = []
+    current_user_id = current_user.id if current_user.is_authenticated else -1
     for l in lists_all:
+        if l.creator == current_user_id:
+            lists_mine.append(l)
         l.creator = [user.username for user in users_all if (user.id == l.creator)][0]
     
     # Create list of Lists in alphabet order
@@ -145,16 +161,44 @@ def lists_all_handler():
     for letter in itertools.groupby(lists_all, lambda x: x.listName[0]):
         lists_with_letter = list(letter[1])
         lists_all_alphabet.append(lists_with_letter)
-    
+
+    lists_favorite = []
+    if current_user.is_authenticated:
+        with ArabicWordsDB() as arabic_words_db:
+            lists_favorite = read_favorites(current_user_id, arabic_words_db)
     # Reorganize Data
     lists_all_dict = {"lists_top_new": lists_top_new,
                     "lists_top_view": lists_top_view,
-                    "lists_all_alphabet": lists_all_alphabet}
+                    "lists_all_alphabet": lists_all_alphabet,
+                    "lists_mine": lists_mine,
+                    "lists_favorite": lists_favorite}
 
     return render_template("lists.all.html",
                                 is_search_submitted = is_search_submitted,
                                 is_list_found = is_list_found,
                                 lists_all_dict = lists_all_dict)
+
+def read_favorites(current_user_id, arabic_words_db):
+    from sqlalchemy import case
+
+    query_columns_lists = { Lists }
+    lists_favorite_ids = arabic_words_db.session.query(ListsUsers.list) \
+        .filter(ListsUsers.user == current_user_id) \
+        .order_by(ListsUsers.pos).all()
+
+    lists_favorite_ids = [item[0] for item in lists_favorite_ids]  # Assuming ListsUsers.list is a single column
+
+    ordering = case(
+        {id: pos for pos, id in enumerate(lists_favorite_ids)},
+        value=ListsUsers.list
+    )
+
+    lists_favorite = arabic_words_db.session.query(*query_columns_lists) \
+        .join(ListsUsers, Lists.ID == ListsUsers.list) \
+        .filter(Lists.ID.in_(lists_favorite_ids)) \
+        .order_by(ordering).all()
+
+    return lists_favorite
 
 @app.route("/lists.asp")
 def lists_handler():
@@ -216,6 +260,9 @@ def lists_handler():
         "str2hebDate_creationTimeUTC": library.functions.Str2hebDate(list_element.creationTimeUTC),
     }
 
+    starred = False
+    if current_user.is_authenticated:
+        starred = check_starred(current_user.id, list_id)
     return render_template("lists.html",
                             is_search_submitted = is_search_submitted,
                             is_list_found = is_list_found,
@@ -224,7 +271,17 @@ def lists_handler():
                             list_dict = list_dict,
                             wordsLists = wordsLists,
                             words = words,
-                            moreLists = moreLists)
+                            moreLists = moreLists,
+                            starred = starred)
+
+def check_starred(user_id, list_id):
+    with ArabicWordsDB() as arabic_words_db:
+        row_exists = arabic_words_db.session.query(ListsUsers) \
+            .filter(ListsUsers.user == user_id, ListsUsers.list == list_id) \
+            .first()
+
+    return True if row_exists else False
+
 
 @app.route("/sentences.asp")
 def sentences_handler():
@@ -405,6 +462,58 @@ def root_handler():
                             letter_like_words = letter_like_words,
                             search_words = search_words,
                             short_words = short_words)
+
+
+@app.route("/login.asp", methods=['GET', 'POST'])
+def login_handler():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        with ArabicUsersDB() as arabic_users_db:
+            user = arabic_users_db.session.query(Users) \
+                .filter(Users.username == username, Users.password == password).first()
+            if user:
+                login_user(user)
+                return redirect("/")
+            return 'Invalid credentials'
+    if current_user.is_authenticated:
+        return redirect("/")
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
+@app.route('/listsToggle.asp')
+def lists_toggle_handler():
+    list_id = request.args.get("lid")
+    if current_user.is_authenticated:
+        if current_user.is_authenticated and list_id:
+            with ArabicWordsDB() as arabic_words_db:
+                is_starred = check_starred(current_user.id, list_id)
+                if is_starred:
+                    arabic_words_db.session.query(ListsUsers) \
+                        .filter(ListsUsers.user == current_user.id, ListsUsers.list == list_id) \
+                        .delete()
+                else:
+                    new_pos = int(get_max_pos(current_user.id, arabic_words_db)) + 1
+                    new_list_user = ListsUsers(user=current_user.id, list=list_id, pos=new_pos)
+                    arabic_words_db.session.add(new_list_user)
+                arabic_words_db.session.commit()
+    else:
+        flash("יש להתחבר על מנת לשמור רשימה למועדפים")
+    return redirect(f"lists.asp?id={list_id}", code=302)
+
+def get_max_pos(user_id, arabic_words_db):
+    max_pos = arabic_words_db.session.query(func.max(ListsUsers.pos)) \
+        .filter(ListsUsers.user == user_id) \
+        .scalar()
+    return max_pos if max_pos is not None else 0
+
 
 if __name__ == '__main__':
     app.run(host=config.config.host_address, port=config.config.port_app, debug=True)

@@ -6,6 +6,8 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
+from flask_login import UserMixin
+
 class RelationTypes:
     SINGULAR_PLURAL = 3
     MALE_FEMALE = 4
@@ -57,7 +59,7 @@ class LoginLog(Base):
     userID = Column(TEXT)
     loginTimeUTC = Column(TEXT)
 
-class Users(Base):
+class Users(Base, UserMixin):
     __tablename__ = "users"
     __table_args__ = PUBLIC_SCHEMA
     id = Column(TEXT, primary_key=True)
