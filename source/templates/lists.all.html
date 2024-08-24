@@ -61,7 +61,7 @@
     <div>
         <div class="lists listsMine">
         <h2>רשימות שיצרתי</h2>
-        {% if (session_userID) %}
+        {% if current_user.is_authenticated %}
             {% if (lists_all_dict["lists_mine"]|length == 0) %}
                 <div>עוד לא יצרת אף רשימה.
                 <br/>מעניין מה הכפתור הזה פה למטה עושה</div>
@@ -92,11 +92,11 @@
 
         <div class="lists listsSaved">
         <h2>המועדפים שלי</h2>
-        {% if (session_userID) %}
+        {% if current_user.is_authenticated %}
             {% if (lists_all_dict["lists_favorite"]|length == 0) %}
                 <div>עוד לא שמרת אף רשימה</div>
             {% else %}
-                {% for list in lists_all_dict["lists_mine"] %}
+                {% for list in lists_all_dict["lists_favorite"] %}
                     <div {% if loop.index > 5 %} class="hidden" {% endif %} onclick="location.href='lists.asp?id={{ list.ID }}';">
                         <span class="listName" title="{{ list.listName }}">{{ list.listName }}</span>
                         <span class="listData" title="תאריך יצירה">{{ list.creationTimeUTC }}
