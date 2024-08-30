@@ -3,10 +3,11 @@ from build.arabic_words_db import ArabicWordsDB, Labels, WordsLabels, Words, Wor
 from build.arabic_users_db import ArabicUsersDB, AllowEdit, Log, LoginLog, Users, UsersWordsFollow
 import config.config
 import datetime
+from datetime import timezone
 import itertools
 import library.functions
 from flask import Flask, redirect, url_for, request, render_template, flash
-from sqlalchemy import select, func, and_, or_, not_
+from sqlalchemy import select, func, and_, or_, not_, cast, Integer, case
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -179,15 +180,15 @@ def lists_all_handler():
                                 lists_all_dict = lists_all_dict)
 
 def read_favorites(current_user_id, arabic_words_db):
-    from sqlalchemy import case
-
     query_columns_lists = { Lists }
     lists_favorite_ids = arabic_words_db.session.query(ListsUsers.list) \
         .filter(ListsUsers.user == current_user_id) \
         .order_by(ListsUsers.pos).all()
 
-    lists_favorite_ids = [item[0] for item in lists_favorite_ids]  # Assuming ListsUsers.list is a single column
+    if not lists_favorite_ids:
+        return lists_favorite_ids
 
+    lists_favorite_ids = [item[0] for item in lists_favorite_ids]  # Assuming ListsUsers.list is a single column
     ordering = case(
         {id: pos for pos, id in enumerate(lists_favorite_ids)},
         value=ListsUsers.list
@@ -507,6 +508,65 @@ def lists_toggle_handler():
     else:
         flash("יש להתחבר על מנת לשמור רשימה למועדפים")
     return redirect(f"lists.asp?id={list_id}", code=302)
+
+
+@app.route("/listsNew.asp")
+def listsNew_handler():
+    if not current_user.is_authenticated:
+        flash("על מנת לערוך רשימות, עליך להיות מחובר")
+        return redirect("login.asp")
+    if fetch_is_site_in_read_only_mode():
+        flash("אין כרגע אפשרות ליצור רשימות חדשות. אנא נסו שנית מאוחר יותר")
+        return redirect("/")
+    with ArabicWordsDB() as arabic_users_db:
+        user_id = current_user.id
+        count = arabic_users_db.session.query(func.count(Lists.ID)).filter(Lists.creator == user_id).scalar()
+        if count > int(current_user.maxLists):
+            message = f"הגעת למספר הרשימות המקסימלי ({count}).</br>לא ניתן ליצור רשימה נוספת בשלב זה. מוזמן לפנות למנהל האתר לפרטים נוספים."
+            flash(message)
+            return redirect("lists.asp")
+        return render_template('listsNew.html', listsCount=count, maxLists=current_user.maxLists)
+
+@app.route("/listsNew.insert.asp", methods=["GET", "POST"])
+def listsNewInsert_handler():
+    if not current_user.is_authenticated:
+        flash("אין לך הרשאה מתאימה")
+        return redirect(request.referrer or '/')
+    if fetch_is_site_in_read_only_mode():
+        flash("אין כרגע אפשרות ליצור רשימות חדשות. אנא נסו שנית מאוחר יותר")
+        return redirect("/")
+    lTitle = request.form.get("lTitle")
+    lDesc = request.form.get("lDesc")
+    lPrivacy = 1
+    lType = 10
+
+    with ArabicWordsDB() as arabic_words_db:
+        list_with_same_name_and_creator = arabic_words_db.session.query(Lists)\
+            .filter(Lists.listName == lTitle, Lists.creator == current_user.id).first()
+        if list_with_same_name_and_creator:
+            flash("כבר יש לך רשימה עם אותו שם")
+            redirect("listsNew.asp")
+        current_max_id = arabic_words_db.session.query(func.max(cast(Lists.ID, Integer))).scalar()
+        new_list_id = int(current_max_id) + 1
+        now = datetime.datetime.now(timezone.utc)
+        new_list = Lists(ID=new_list_id,
+                         creator=current_user.id,
+                         listName=lTitle,
+                         privacy=lPrivacy,
+                         type=lType,
+                         listDesc=lDesc,
+                         creationTimeUTC=now,
+                         lastUpdateUTC=now
+                         )
+        arabic_words_db.session.add(new_list)
+        arabic_words_db.session.commit()
+        flash("הרשימה נוספה בהצלחה")
+        return redirect(f"lists.asp?id={new_list_id}")
+
+def fetch_is_site_in_read_only_mode():
+    with ArabicUsersDB() as arabic_users_db:
+        readonly_site = arabic_users_db.session.query(AllowEdit).filter(AllowEdit.siteName == 'readOnly').first()
+        return readonly_site and readonly_site.allowed == "1"
 
 def get_max_pos(user_id, arabic_words_db):
     max_pos = arabic_words_db.session.query(func.max(ListsUsers.pos)) \
