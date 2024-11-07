@@ -301,10 +301,13 @@ def sentences_handler():
 def guide_handler():
     return render_template("guide.html")
 
+@app.route("/guideTeam.asp")
+def guide_team_handler():
+    return render_template("guideTeam.html")
+
 @app.route("/clock.asp")
 def clock_handler():
-    return render_template("clock.html",
-                            )
+    return render_template("clock.html")
 
 @app.route("/word.asp")
 def word_handler():
