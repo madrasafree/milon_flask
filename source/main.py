@@ -305,6 +305,10 @@ def guide_handler():
 def guide_team_handler():
     return render_template("guideTeam.html")
 
+@app.route("/welcome.asp")
+def welcome_handler():
+    return render_template("welcome.html")
+
 @app.route("/clock.asp")
 def clock_handler():
     return render_template("clock.html")
