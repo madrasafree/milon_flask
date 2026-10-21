@@ -1,5 +1,5 @@
 > [!WARNING]
-> **FROZEN: no longer maintained (2026-10-21).** A 2024 Flask + PostgreSQL proof-of-concept of the Madrasa spoken-Arabic dictionary. The dictionary at milon.madrasafree.com runs [spoken-arabic-dictionary-django](https://github.com/madrasafree/spoken-arabic-dictionary-django). Kept for reference only; do not deploy.
+> **FROZEN: no longer maintained (2026-10-21).** A Flask + PostgreSQL proof-of-concept (2023-24) of the Madrasa spoken-Arabic dictionary. The dictionary at milon.madrasafree.com runs [spoken-arabic-dictionary-django](https://github.com/madrasafree/spoken-arabic-dictionary-django). Kept for reference only; do not deploy.
 
 # Madrasa Spoken Arabic Dictionary (Flask Version)
 
