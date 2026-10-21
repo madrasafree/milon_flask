@@ -1,3 +1,6 @@
+> [!WARNING]
+> **FROZEN: no longer maintained (2026-10-21).** A 2024 Flask + PostgreSQL proof-of-concept of the Madrasa spoken-Arabic dictionary. The dictionary at milon.madrasafree.com runs [spoken-arabic-dictionary-django](https://github.com/madrasafree/spoken-arabic-dictionary-django). Kept for reference only; do not deploy.
+
 # Madrasa Spoken Arabic Dictionary (Flask Version)
 
 This repository contains a Flask-based version of the Madrasa Spoken Arabic Dictionary, containerized with Docker for easy setup and development. It serves as a proof-of-concept for migrating the original ASP Classic application to a modern Python web framework.
